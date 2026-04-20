@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="hmsLogoGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22d3ee" />
+      <stop offset="50%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+    <linearGradient id="hmsLogoSoft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.92" />
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.68" />
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="44" height="44" rx="14" fill="url(#hmsLogoGrad)" />
+  <path d="M14 30V18h4.2v4.6h11.6V18H34v12h-4.2v-4.6H18.2V30H14z" fill="url(#hmsLogoSoft)" />
+  <circle cx="35.5" cy="12.5" r="2.3" fill="#ffffff" fill-opacity="0.88" />
+</svg>
