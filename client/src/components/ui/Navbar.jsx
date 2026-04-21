@@ -10,6 +10,7 @@ export default function Navbar({ darkMode, onToggleTheme }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
   const onNavigate = () => setIsMenuOpen(false);
 
@@ -28,8 +29,14 @@ export default function Navbar({ darkMode, onToggleTheme }) {
   const onLogout = () => {
     logout();
     setIsMenuOpen(false);
+    setShowCloseConfirm(false);
     showAuthSuccessToast("👋 Logged out successfully", "You have been signed out safely. See you soon ✨");
     navigate("/");
+  };
+
+  const confirmClose = () => {
+    setIsMenuOpen(false);
+    setShowCloseConfirm(false);
   };
 
   const navItemClass = ({ isActive }) => {
@@ -65,17 +72,39 @@ export default function Navbar({ darkMode, onToggleTheme }) {
           <button
             type="button"
             onClick={onToggleTheme}
-            className="rounded-xl border border-cyan-200/70 bg-white/80 px-3 py-2 text-xs font-bold text-cyan-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-cyan-300"
+            title="Toggle Theme"
+            className="tap-target flex items-center justify-center rounded-xl border border-cyan-200/70 bg-white/80 px-2.5 py-2 text-lg font-bold text-cyan-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-cyan-300"
           >
-            {darkMode ? "Light" : "Dark"}
+            {darkMode ? "☀️" : "🌙"}
           </button>
-          <button
-            type="button"
-            onClick={() => setIsMenuOpen((v) => !v)}
-            className="btn-secondary border border-cyan-200/70 bg-white/80 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/70"
-          >
-            {isMenuOpen ? "Close" : "Menu"}
-          </button>
+          {user && (
+            <>
+              <Link
+                to="/profile"
+                title="Profile"
+                className="tap-target flex items-center justify-center rounded-xl border border-cyan-200/70 bg-white/80 px-2.5 py-2 text-lg dark:border-slate-700 dark:bg-slate-900/70"
+              >
+                👤
+              </Link>
+              <button
+                type="button"
+                onClick={onLogout}
+                title="Logout"
+                className="tap-target flex items-center justify-center rounded-xl border border-rose-200/70 bg-gradient-to-r from-rose-50 to-orange-50 px-2.5 py-2 text-lg font-bold dark:border-slate-700 dark:bg-slate-900/70"
+              >
+                🚪
+              </button>
+            </>
+          )}
+          {!user && (
+            <Link
+              to="/login"
+              title="Login"
+              className="tap-target flex items-center justify-center rounded-xl border border-cyan-200/70 bg-white/80 px-2.5 py-2 text-lg font-bold dark:border-slate-700 dark:bg-slate-900/70"
+            >
+              🔑
+            </Link>
+          )}
         </div>
 
         <nav className="hidden items-center gap-3 md:flex">
@@ -144,15 +173,10 @@ export default function Navbar({ darkMode, onToggleTheme }) {
               >
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{user.name}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
-                <div className="mt-2 flex gap-2">
-                  <button type="button" onClick={onToggleTheme} className="btn-secondary flex-1 py-2 text-xs">{darkMode ? "Light Mode" : "Dark Mode"}</button>
-                  <button type="button" onClick={onLogout} className="btn-primary flex-1 bg-gradient-to-r from-rose-500 to-orange-500 py-2 text-xs">Logout</button>
-                </div>
               </motion.div>
             ) : (
-              <div className="mt-2 grid grid-cols-2 gap-2">
-                <Link to="/login" onClick={onNavigate} className="btn-secondary py-2 text-center text-sm">Login</Link>
-                <Link to="/register" onClick={onNavigate} className="btn-primary bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 py-2 text-center text-sm">Register</Link>
+              <div className="mt-2">
+                <Link to="/register" onClick={onNavigate} className="btn-primary w-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 py-2 text-center text-sm">Register</Link>
               </div>
             )}
           </motion.div>
