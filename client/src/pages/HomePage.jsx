@@ -85,12 +85,13 @@ export default function HomePage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4 px-3 py-3 pb-8 md:space-y-8 md:px-4 md:py-7 md:pb-10">
-      <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="card overflow-hidden border-blue-100/70 bg-gradient-to-br from-[#eaf4ff] via-white to-[#f7fbff] p-3.5 dark:border-slate-700/50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 sm:p-5">
+    <div className="mx-auto max-w-7xl space-y-4 px-3 py-3 pb-8 md:space-y-8 md:px-4 md:py-7 md:pb-10 lg:px-6 xl:px-8">
+      <div className="space-y-4 lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:items-start lg:gap-5 lg:space-y-0 xl:gap-6">
+      <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="card overflow-hidden border-blue-100/70 bg-gradient-to-br from-[#eaf4ff] via-white to-[#f7fbff] p-3.5 dark:border-slate-700/50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 sm:p-5 lg:p-6">
         <div className="mb-2.5 flex items-center justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Horizon-Hotels</p>
-            <h1 className="font-display text-[23px] font-bold leading-tight text-slate-900 dark:text-white sm:text-2xl">Find your next stay</h1>
+            <h1 className="font-display text-[23px] font-bold leading-tight text-slate-900 dark:text-white sm:text-2xl lg:text-3xl">Find your next stay</h1>
           </div>
           <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-200">{hotelCount}+ hotels</span>
         </div>
@@ -108,7 +109,7 @@ export default function HomePage() {
           ))}
         </div>
 
-        <form onSubmit={onSearch} className="space-y-1.5">
+        <form onSubmit={onSearch} className="space-y-1.5 lg:space-y-2">
           <label className="input flex items-center gap-2 py-2.5">
             <span className="text-sm text-slate-400">📍</span>
             <input
@@ -147,11 +148,12 @@ export default function HomePage() {
       <section className="space-y-1.5">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-base font-bold sm:text-lg">Deals for you</h2>
-          <span className="text-[11px] font-semibold text-blue-600">Swipe</span>
+          <span className="text-[11px] font-semibold text-blue-600 lg:hidden">Swipe</span>
+          <span className="hidden text-[11px] font-semibold text-blue-600 lg:inline">Top picks</span>
         </div>
-        <div className="flex gap-3 overflow-x-auto pb-1">
+        <div className="flex gap-3 overflow-x-auto pb-1 lg:grid lg:grid-cols-1 lg:overflow-visible lg:pb-0 xl:grid-cols-1">
           {offers.map((offer) => (
-            <article key={offer.code} className={`min-w-[258px] rounded-2xl bg-gradient-to-br ${offer.color} p-4 text-white shadow-lg`}>
+            <article key={offer.code} className={`min-w-[258px] rounded-2xl bg-gradient-to-br ${offer.color} p-4 text-white shadow-lg lg:min-w-0 lg:p-4`}>
               <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/80">Offer</p>
               <h3 className="mt-1 text-base font-bold sm:text-lg">{offer.title}</h3>
               <p className="mt-1 text-[13px] text-white/90">{offer.subtitle}</p>
@@ -163,10 +165,11 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+      </div>
 
       <section className="space-y-1.5">
         <h2 className="font-display text-base font-bold sm:text-lg">Popular destinations</h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {cities.map((city) => (
             <button
               key={city.name}
@@ -174,7 +177,7 @@ export default function HomePage() {
               onClick={() => navigate(`/hotels?city=${encodeURIComponent(city.name)}`)}
               className="group relative overflow-hidden rounded-2xl"
             >
-              <img src={city.image} alt={city.name} className="h-24 w-full object-cover transition duration-300 group-hover:scale-105 sm:h-28" />
+              <img src={city.image} alt={city.name} className="h-24 w-full object-cover transition duration-300 group-hover:scale-105 sm:h-28 lg:h-36" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/65 via-slate-900/10 to-transparent" />
               <p className="absolute bottom-2 left-2 text-[13px] font-bold text-white sm:text-sm">{city.name}</p>
             </button>
@@ -188,7 +191,7 @@ export default function HomePage() {
           <Link to="/hotels" className="text-[11px] font-semibold text-blue-600">View all</Link>
         </div>
 
-        <div className="space-y-3">
+        <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3 lg:gap-4">
           {recommendedHotels.map((hotel) => {
             const minPrice = Math.min(...hotel.roomTypes.map((room) => room.basePrice));
             const fallbackImage = "https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=600&q=75";
@@ -197,7 +200,7 @@ export default function HomePage() {
                 <img 
                   src={hotel.images?.[0] || fallbackImage} 
                   alt={hotel.name} 
-                  className="h-36 w-full object-cover" 
+                  className="h-36 w-full object-cover lg:h-44" 
                   loading="lazy"
                   onError={(e) => { e.target.src = fallbackImage; }}
                 />

@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import BrandLogo from "./BrandLogo";
 import { showAuthSuccessToast } from "../../utils/authToasts";
@@ -44,11 +43,11 @@ export default function Navbar({ darkMode, onToggleTheme }) {
     navigate("/");
   };
 
-  const mobileIconBtnClass = "tap-target flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-200/70 bg-white/80 text-base font-bold text-cyan-700 transition hover:shadow-md dark:border-slate-700 dark:bg-slate-900/70 dark:text-cyan-300";
+  const mobileIconBtnClass = "tap-target flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-200/70 bg-white/80 text-base font-bold text-cyan-700 transition hover:shadow-md max-[360px]:h-9 max-[360px]:w-9 max-[360px]:rounded-lg max-[360px]:text-[15px] dark:border-slate-700 dark:bg-slate-900/70 dark:text-cyan-300";
 
   const navItemClass = ({ isActive }) => {
     const active = isActive ? "text-cyan-800 shadow-sm dark:text-cyan-300" : "text-slate-600 dark:text-slate-300";
-    return `relative rounded-full border border-cyan-200/60 bg-gradient-to-r from-white/90 via-cyan-50/95 to-blue-50/90 px-3 py-2 text-center text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700/60 dark:from-slate-900/85 dark:via-slate-800/85 dark:to-slate-900/85 ${active}`;
+    return `relative rounded-full border border-cyan-200/60 bg-gradient-to-r from-white/90 via-cyan-50/95 to-blue-50/90 px-3 py-2 text-center text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md lg:px-4 lg:py-2.5 dark:border-slate-700/60 dark:from-slate-900/85 dark:via-slate-800/85 dark:to-slate-900/85 ${active}`;
   };
 
   const renderNavItem = (to, label, options = {}) => (
@@ -70,9 +69,9 @@ export default function Navbar({ darkMode, onToggleTheme }) {
 
   return (
     <header className="sticky top-0 z-30 border-b border-white/30 bg-gradient-to-r from-white/85 via-cyan-50/60 to-white/85 shadow-lg shadow-cyan-100/30 backdrop-blur-xl dark:border-slate-700/40 dark:from-slate-950/90 dark:via-slate-900/80 dark:to-slate-950/90 dark:shadow-none">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-3 sm:px-4">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-3 py-3 max-[360px]:gap-2 max-[360px]:px-2 max-[360px]:py-2 sm:px-4 lg:px-6">
         <Link to="/" className="hover-lift" onClick={onNavigate}>
-          <BrandLogo size={38} bubbleText textClassName="text-base md:text-lg" />
+          <BrandLogo size={38} bubbleText textClassName="text-base max-[360px]:text-[15px] md:text-lg" />
         </Link>
 
         <div className="flex items-center gap-2 md:hidden">
@@ -114,7 +113,7 @@ export default function Navbar({ darkMode, onToggleTheme }) {
           )}
         </div>
 
-        <nav className="hidden items-center gap-3 md:flex">
+        <nav className="hidden items-center gap-3 lg:gap-4 md:flex">
           {renderNavItem("/", "Home", { end: true })}
           {renderNavItem("/hotels", "Hotels")}
           {user && (
