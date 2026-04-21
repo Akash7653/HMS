@@ -506,15 +506,6 @@ export default function HotelDetailsPage() {
         </form>
       </GlassModal>
 
-      <div className="safe-bottom-above-nav fixed inset-x-0 z-30 px-3 md:hidden">
-        <button
-          type="button"
-          className="tap-target btn-primary w-full bg-gradient-to-r from-orange-500 to-emerald-500 py-2.5 text-sm font-bold shadow-xl"
-          onClick={() => navigate(`/checkout/${id}`, { state: { hotel, booking } })}
-        >
-          Book Now
-        </button>
-      </div>
     </div>
   );
 }

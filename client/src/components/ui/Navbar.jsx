@@ -26,6 +26,17 @@ export default function Navbar({ darkMode, onToggleTheme }) {
     return base;
   }, [user]);
 
+  const routeBadgeLabel = useMemo(() => {
+    if (location.pathname === "/") return "Home";
+    if (location.pathname.startsWith("/hotels")) return "Hotles";
+    if (location.pathname.startsWith("/bookings")) return "Bookings";
+    if (location.pathname.startsWith("/wishlist")) return "Wishlist";
+    if (location.pathname.startsWith("/payments")) return "Payments";
+    if (location.pathname.startsWith("/profile")) return "Profile";
+    if (location.pathname.startsWith("/admin")) return "Admin";
+    return "Home";
+  }, [location.pathname]);
+
   const onLogout = () => {
     logout();
     setIsMenuOpen(false);
@@ -96,7 +107,7 @@ export default function Navbar({ darkMode, onToggleTheme }) {
               </button>
             </>
           )}
-          {!user && (
+          {!user && location.pathname !== "/register" && (
             <Link
               to="/login"
               title="Login"
@@ -191,7 +202,7 @@ export default function Navbar({ darkMode, onToggleTheme }) {
               <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">{user.email}</p>
             </div>
             <span className="rounded-full bg-blue-100 px-2 py-1 font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
-              {location.pathname === "/" ? "Home" : location.pathname.replace("/", "").slice(0, 12)}
+              {routeBadgeLabel}
             </span>
           </div>
         </div>

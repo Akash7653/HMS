@@ -1,5 +1,5 @@
 ﻿import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
@@ -203,10 +203,13 @@ export default function RegisterPage() {
         )}
         
         <div className="space-y-2 text-center">
-          <p className="text-sm text-slate-600 dark:text-slate-300">
-            Already have an account? <Link className="font-semibold text-brand-700" to="/login">Login</Link>
-          </p>
-          <button type="button" className="btn-secondary w-full" onClick={() => navigate("/login")}>Go to Login</button>
+          <button
+            type="button"
+            className="w-full rounded-xl border border-cyan-200 bg-gradient-to-r from-cyan-50 to-blue-50 px-4 py-2 text-sm font-semibold text-cyan-800 transition hover:shadow-md dark:border-slate-700 dark:from-slate-900 dark:to-slate-800 dark:text-cyan-300"
+            onClick={() => navigate("/login")}
+          >
+            Sign in to existing account
+          </button>
         </div>
         </div>
       </motion.form>
