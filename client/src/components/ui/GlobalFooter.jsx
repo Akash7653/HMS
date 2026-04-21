@@ -2,8 +2,23 @@
 
 export default function GlobalFooter() {
   return (
-    <footer className="mt-12 border-t border-slate-200/70 bg-white/40 dark:border-slate-700/60 dark:bg-slate-950/30">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-2 xl:grid-cols-4">
+    <footer className="mt-1 border-t border-slate-200/70 bg-white/40 dark:border-slate-700/60 dark:bg-slate-950/30 md:mt-6">
+      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 overflow-x-auto px-3 py-4 md:hidden">
+        <div className="shrink-0">
+          <BrandLogo textClassName="text-base" />
+        </div>
+        <div className="shrink-0 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
+          Hotels
+        </div>
+        <div className="shrink-0 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
+          Support
+        </div>
+        <div className="shrink-0 rounded-full border border-slate-200/70 bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
+          Policies
+        </div>
+      </div>
+
+      <div className="mx-auto hidden max-w-7xl gap-8 px-4 py-10 md:grid md:grid-cols-2 xl:grid-cols-4">
         <div className="space-y-3">
           <BrandLogo textClassName="text-xl" />
           <p className="max-w-sm text-sm text-slate-600 dark:text-slate-300">

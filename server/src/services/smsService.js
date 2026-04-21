@@ -43,6 +43,17 @@ async function sendSms({ phone, body }) {
 
   if (!response.ok) {
     const text = await response.text();
+
+    // Twilio trial accounts can only send to verified destination numbers.
+    // Fall back to simulation so signup flow continues in demo environments.
+    if (text.includes("21608") || text.toLowerCase().includes("unverified")) {
+      console.log("[SMS_TRIAL_RESTRICTION]", { to, body });
+      return {
+        simulated: true,
+        reason: "trial_unverified_destination",
+      };
+    }
+
     throw new Error(`SMS sending failed: ${text}`);
   }
 

@@ -40,11 +40,13 @@ exports.register = async (req, res, next) => {
       html: `<p>Your account setup has started. Please complete phone OTP verification to activate your account.</p>`,
     });
 
-    await sendSmsOtp({ phone, otp: phoneOtp, reason: "registration" });
+    const smsResult = await sendSmsOtp({ phone, otp: phoneOtp, reason: "registration" });
 
     res.status(201).json({
       message: "Account created. Please verify phone using OTP.",
       verificationRequired: true,
+      smsFallback: Boolean(smsResult?.simulated),
+      devOtp: smsResult?.simulated ? { phoneOtp } : null,
       user: {
         id: user._id,
         name: user.name,
@@ -133,10 +135,12 @@ exports.resendOtp = async (req, res, next) => {
       html: `<p>Your phone OTP has been regenerated. Please use the latest OTP sent to your mobile.</p>`,
     });
 
-    await sendSmsOtp({ phone: user.phone, otp: user.phoneOtp, reason: "resend" });
+    const smsResult = await sendSmsOtp({ phone: user.phone, otp: user.phoneOtp, reason: "resend" });
 
     res.json({
       message: "New OTP sent",
+      smsFallback: Boolean(smsResult?.simulated),
+      devOtp: smsResult?.simulated ? { phoneOtp: user.phoneOtp } : null,
     });
   } catch (error) {
     next(error);
@@ -210,6 +214,9 @@ exports.updateProfile = async (req, res, next) => {
     if (typeof city === "string") user.city = city;
     if (typeof country === "string") user.country = country;
 
+    let smsFallback = false;
+    let devOtp = null;
+
     if (!user.emailVerified || !user.phoneVerified) {
       user.emailOtp = generateOtp();
       user.phoneOtp = generateOtp();
@@ -221,7 +228,12 @@ exports.updateProfile = async (req, res, next) => {
         html: `<p>Your profile was updated. Please complete phone OTP verification to continue secure access.</p>`,
       });
 
-      await sendSmsOtp({ phone: user.phone, otp: user.phoneOtp, reason: "profile-update" });
+      const smsResult = await sendSmsOtp({ phone: user.phone, otp: user.phoneOtp, reason: "profile-update" });
+
+      if (smsResult?.simulated) {
+        smsFallback = true;
+        devOtp = { phoneOtp: user.phoneOtp };
+      }
     }
 
     await user.save();
@@ -240,6 +252,8 @@ exports.updateProfile = async (req, res, next) => {
         phoneVerified: user.phoneVerified,
       },
       verificationRequired: !user.emailVerified || !user.phoneVerified,
+      smsFallback,
+      devOtp,
     });
   } catch (error) {
     next(error);

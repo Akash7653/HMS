@@ -22,6 +22,7 @@ export default function RegisterPage() {
   const [contact, setContact] = useState({ email: "", phone: "" });
   const [showOtpPanel, setShowOtpPanel] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const [devOtp, setDevOtp] = useState(null);
 
   const resolveErrorMessage = (error, fallback) => {
     const apiMessage = error?.response?.data?.message;
@@ -54,10 +55,14 @@ export default function RegisterPage() {
         country: form.country,
         password: form.password,
       };
-      await register(payload);
+      const registerRes = await register(payload);
       setContact({ email: form.email, phone: form.phone });
       localStorage.setItem("hms_pending_verification_email", form.email);
       setShowOtpPanel(true);
+      setDevOtp(registerRes?.devOtp || null);
+      if (registerRes?.smsFallback) {
+        toast("SMS provider blocked this number. Use OTP shown in-app.", { icon: "⚠️" });
+      }
       showAuthSuccessToast("OTP sent successfully", "Check your phone and verify to complete signup.");
     } catch (error) {
       toast.error(resolveErrorMessage(error, "Registration failed"));
@@ -85,7 +90,11 @@ export default function RegisterPage() {
 
   const onResend = async () => {
     try {
-      await resendOtp(contact);
+      const resendRes = await resendOtp(contact);
+      setDevOtp(resendRes?.devOtp || null);
+      if (resendRes?.smsFallback) {
+        toast("SMS fallback active. Use the OTP shown below.", { icon: "⚠️" });
+      }
       toast.success("New OTP sent");
     } catch (error) {
       toast.error(resolveErrorMessage(error, "Unable to resend OTP"));
@@ -226,6 +235,11 @@ export default function RegisterPage() {
             <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
               Enter the OTP sent to <span className="font-semibold">{contact.phone}</span>
             </p>
+            {devOtp?.phoneOtp ? (
+              <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200">
+                SMS fallback OTP: <span className="font-bold tracking-widest">{devOtp.phoneOtp}</span>
+              </p>
+            ) : null}
 
             <div className="mt-4">
               <input

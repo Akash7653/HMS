@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
+import toast from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
 import BrandLogo from "./BrandLogo";
 import { showAuthSuccessToast } from "../../utils/authToasts";
@@ -10,7 +11,6 @@ export default function Navbar({ darkMode, onToggleTheme }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
   const onNavigate = () => setIsMenuOpen(false);
 
@@ -40,14 +40,14 @@ export default function Navbar({ darkMode, onToggleTheme }) {
   const onLogout = () => {
     logout();
     setIsMenuOpen(false);
-    setShowCloseConfirm(false);
     showAuthSuccessToast("👋 Logged out successfully", "You have been signed out safely. See you soon ✨");
     navigate("/");
   };
 
-  const confirmClose = () => {
-    setIsMenuOpen(false);
-    setShowCloseConfirm(false);
+  const mobileIconBtnClass = "tap-target flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-200/70 bg-white/80 text-base font-bold text-cyan-700 transition hover:shadow-md dark:border-slate-700 dark:bg-slate-900/70 dark:text-cyan-300";
+
+  const onNotifications = () => {
+    toast("No new notifications right now.", { icon: "🔔" });
   };
 
   const navItemClass = ({ isActive }) => {
@@ -84,16 +84,24 @@ export default function Navbar({ darkMode, onToggleTheme }) {
             type="button"
             onClick={onToggleTheme}
             title="Toggle Theme"
-            className="tap-target flex items-center justify-center rounded-xl border border-cyan-200/70 bg-white/80 px-2.5 py-2 text-lg font-bold text-cyan-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-cyan-300"
+            className={mobileIconBtnClass}
           >
             {darkMode ? "☀️" : "🌙"}
+          </button>
+          <button
+            type="button"
+            onClick={onNotifications}
+            title="Notifications"
+            className={mobileIconBtnClass}
+          >
+            🔔
           </button>
           {user && (
             <>
               <Link
                 to="/profile"
                 title="Profile"
-                className="tap-target flex items-center justify-center rounded-xl border border-cyan-200/70 bg-white/80 px-2.5 py-2 text-lg dark:border-slate-700 dark:bg-slate-900/70"
+                className={mobileIconBtnClass}
               >
                 👤
               </Link>
@@ -101,7 +109,7 @@ export default function Navbar({ darkMode, onToggleTheme }) {
                 type="button"
                 onClick={onLogout}
                 title="Logout"
-                className="tap-target flex items-center justify-center rounded-xl border border-rose-200/70 bg-gradient-to-r from-rose-50 to-orange-50 px-2.5 py-2 text-lg font-bold dark:border-slate-700 dark:bg-slate-900/70"
+                className={mobileIconBtnClass}
               >
                 🚪
               </button>
@@ -111,7 +119,7 @@ export default function Navbar({ darkMode, onToggleTheme }) {
             <Link
               to="/login"
               title="Login"
-              className="tap-target flex items-center justify-center rounded-xl border border-cyan-200/70 bg-white/80 px-2.5 py-2 text-lg font-bold dark:border-slate-700 dark:bg-slate-900/70"
+              className={mobileIconBtnClass}
             >
               🔑
             </Link>

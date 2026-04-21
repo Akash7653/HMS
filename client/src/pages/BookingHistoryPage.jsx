@@ -16,6 +16,9 @@ export default function BookingHistoryPage() {
   }, []);
 
   const cancelBooking = async (id) => {
+    const shouldCancel = window.confirm("Are you sure you want to cancel this booking?");
+    if (!shouldCancel) return;
+
     try {
       await api.patch(`/bookings/${id}/cancel`, { reason: "Cancelled from dashboard" });
       toast.success("Booking cancelled");
