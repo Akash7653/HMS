@@ -17,6 +17,10 @@ function getProvider() {
   return "textbelt";
 }
 
+function isTextbeltQuotaResult(result) {
+  return Boolean(result?.simulated && result?.reason === "textbelt_quota_exceeded");
+}
+
 async function sendViaTwilio({ to, body }) {
   const accountSid = process.env.TWILIO_ACCOUNT_SID || "";
   const apiKeySid = process.env.TWILIO_API_KEY_SID || "";
@@ -111,6 +115,19 @@ async function sendSms({ phone, body }) {
     }
     if (provider === "textbelt") {
       return await sendViaTextbelt({ to, body });
+    }
+    if (provider === "hybrid") {
+      const textbeltResult = await sendViaTextbelt({ to, body });
+
+      if (isTextbeltQuotaResult(textbeltResult) && shouldUseTwilio()) {
+        const twilioResult = await sendViaTwilio({ to, body });
+        return {
+          ...twilioResult,
+          fallbackFrom: "textbelt",
+        };
+      }
+
+      return textbeltResult;
     }
 
     console.log("[SMS_SIMULATION_UNKNOWN_PROVIDER]", { provider, to, body });

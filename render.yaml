@@ -36,7 +36,7 @@ services:
       - key: TWILIO_FROM_NUMBER
         sync: false
       - key: SMS_PROVIDER
-        value: textbelt
+        value: hybrid
       - key: TEXTBELT_KEY
         value: textbelt
       - key: OPENAI_API_KEY
