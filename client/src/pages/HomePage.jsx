@@ -85,15 +85,16 @@ export default function HomePage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl space-y-4 px-3 py-3 pb-8 md:space-y-8 md:px-4 md:py-7 md:pb-10 lg:px-6 xl:px-8">
-      <div className="space-y-4 lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:items-start lg:gap-5 lg:space-y-0 xl:gap-6">
-      <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="card overflow-hidden border-blue-100/70 bg-gradient-to-br from-[#eaf4ff] via-white to-[#f7fbff] p-3.5 dark:border-slate-700/50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 sm:p-5 lg:p-6">
-        <div className="mb-2.5 flex items-center justify-between">
+    <div className="mx-auto max-w-7xl space-y-4 px-3 py-3 pb-8 md:space-y-8 md:px-4 md:py-7 md:pb-10 lg:space-y-10 lg:px-6 xl:px-8">
+      <div className="space-y-4 lg:grid lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] lg:items-start lg:gap-6 lg:space-y-0 xl:gap-7">
+        <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="card overflow-hidden border-blue-100/70 bg-gradient-to-br from-[#eaf4ff] via-white to-[#f7fbff] p-3.5 dark:border-slate-700/50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 sm:p-5 lg:p-7">
+        <div className="mb-2.5 flex items-center justify-between lg:mb-3.5">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Horizon-Hotels</p>
-            <h1 className="font-display text-[23px] font-bold leading-tight text-slate-900 dark:text-white sm:text-2xl lg:text-3xl">Find your next stay</h1>
+            <h1 className="font-display text-[23px] font-bold leading-tight text-slate-900 dark:text-white sm:text-2xl lg:text-4xl xl:text-[42px]">Find your next stay</h1>
+            <p className="mt-1 hidden text-sm text-slate-600 lg:block lg:text-base dark:text-slate-300">Curated premium stays with faster booking and smarter pricing insights.</p>
           </div>
-          <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-200">{hotelCount}+ hotels</span>
+          <span className="rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-sm lg:px-3 lg:py-1.5 lg:text-xs dark:bg-slate-800 dark:text-slate-200">{hotelCount}+ hotels</span>
         </div>
 
         <div className="mb-2.5 inline-flex rounded-full border border-blue-200 bg-blue-50/80 p-1 dark:border-slate-700 dark:bg-slate-800/70">
@@ -109,7 +110,7 @@ export default function HomePage() {
           ))}
         </div>
 
-        <form onSubmit={onSearch} className="space-y-1.5 lg:space-y-2">
+        <form onSubmit={onSearch} className="space-y-1.5 lg:space-y-3">
           <label className="input flex items-center gap-2 py-2.5">
             <span className="text-sm text-slate-400">📍</span>
             <input
@@ -138,28 +139,28 @@ export default function HomePage() {
             </select>
             <button type="button" className="btn-secondary whitespace-nowrap px-4" onClick={onNearMe}>Near Me</button>
           </div>
-          <button type="submit" className="btn-primary w-full bg-gradient-to-r from-blue-600 to-cyan-500 py-2.5 text-sm font-bold sm:py-3 sm:text-base">
+          <button type="submit" className="btn-primary w-full bg-gradient-to-r from-blue-600 to-cyan-500 py-2.5 text-sm font-bold sm:py-3 sm:text-base lg:py-3.5 lg:text-[17px]">
             Search Hotels
           </button>
           {searchNights > 0 ? <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{searchNights} nights selected</p> : null}
         </form>
       </motion.section>
 
-      <section className="space-y-1.5">
+      <section className="space-y-1.5 lg:space-y-2.5">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-base font-bold sm:text-lg">Deals for you</h2>
+          <h2 className="font-display text-base font-bold sm:text-lg lg:text-2xl">Deals for you</h2>
           <span className="text-[11px] font-semibold text-blue-600 lg:hidden">Swipe</span>
-          <span className="hidden text-[11px] font-semibold text-blue-600 lg:inline">Top picks</span>
+          <span className="hidden text-[12px] font-semibold text-blue-600 lg:inline">Top picks</span>
         </div>
         <div className="flex gap-3 overflow-x-auto pb-1 lg:grid lg:grid-cols-1 lg:overflow-visible lg:pb-0 xl:grid-cols-1">
           {offers.map((offer) => (
-            <article key={offer.code} className={`min-w-[258px] rounded-2xl bg-gradient-to-br ${offer.color} p-4 text-white shadow-lg lg:min-w-0 lg:p-4`}>
+            <article key={offer.code} className={`min-w-[258px] rounded-2xl bg-gradient-to-br ${offer.color} p-4 text-white shadow-lg lg:min-w-0 lg:p-5`}>
               <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-white/80">Offer</p>
-              <h3 className="mt-1 text-base font-bold sm:text-lg">{offer.title}</h3>
-              <p className="mt-1 text-[13px] text-white/90">{offer.subtitle}</p>
+              <h3 className="mt-1 text-base font-bold sm:text-lg lg:text-xl">{offer.title}</h3>
+              <p className="mt-1 text-[13px] text-white/90 lg:text-sm">{offer.subtitle}</p>
               <div className="mt-3 flex items-center justify-between">
                 <p className="inline-flex rounded-full bg-white/20 px-2 py-1 text-[11px] font-bold">Code: {offer.code}</p>
-                <button type="button" className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-slate-800">Apply</button>
+                <button type="button" className="rounded-full bg-white px-3 py-1 text-[11px] font-bold text-slate-800 lg:px-4 lg:py-1.5 lg:text-xs">Apply</button>
               </div>
             </article>
           ))}
@@ -167,8 +168,8 @@ export default function HomePage() {
       </section>
       </div>
 
-      <section className="space-y-1.5">
-        <h2 className="font-display text-base font-bold sm:text-lg">Popular destinations</h2>
+      <section className="space-y-1.5 lg:space-y-3">
+        <h2 className="font-display text-base font-bold sm:text-lg lg:text-2xl">Popular destinations</h2>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {cities.map((city) => (
             <button
@@ -185,10 +186,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="space-y-2">
+      <section className="space-y-2 lg:space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="font-display text-base font-bold sm:text-lg">Recommended hotels</h2>
-          <Link to="/hotels" className="text-[11px] font-semibold text-blue-600">View all</Link>
+          <h2 className="font-display text-base font-bold sm:text-lg lg:text-2xl">Recommended hotels</h2>
+          <Link to="/hotels" className="text-[11px] font-semibold text-blue-600 lg:text-[13px]">View all</Link>
         </div>
 
         <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-3 lg:gap-4">
@@ -204,18 +205,18 @@ export default function HomePage() {
                   loading="lazy"
                   onError={(e) => { e.target.src = fallbackImage; }}
                 />
-                <div className="space-y-1.5 p-3">
+                <div className="space-y-1.5 p-3 lg:p-4">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-display text-[15px] font-bold sm:text-base">{hotel.name}</h3>
+                    <h3 className="font-display text-[15px] font-bold sm:text-base lg:text-lg">{hotel.name}</h3>
                     <span className="rounded-full bg-blue-100 px-2 py-1 text-[10px] font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">{hotel.ratingAverage?.toFixed?.(1) || "4.0"}</span>
                   </div>
-                  <p className="text-[12px] text-slate-600 dark:text-slate-300 sm:text-sm">{hotel.location?.city}, {hotel.location?.country}</p>
+                  <p className="text-[12px] text-slate-600 dark:text-slate-300 sm:text-sm lg:text-[14px]">{hotel.location?.city}, {hotel.location?.country}</p>
                   <div className="flex items-end justify-between">
                     <div>
                       <p className="text-[10px] text-slate-500 dark:text-slate-400">Per night from</p>
-                      <p className="text-[13px] font-semibold text-emerald-700 dark:text-emerald-300 sm:text-sm">Rs. {minPrice}</p>
+                      <p className="text-[13px] font-semibold text-emerald-700 dark:text-emerald-300 sm:text-sm lg:text-base">Rs. {minPrice}</p>
                     </div>
-                    <Link to={`/hotels/${hotel._id}`} className="btn-primary bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1.5 text-[11px]">View Deal</Link>
+                    <Link to={`/hotels/${hotel._id}`} className="btn-primary bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1.5 text-[11px] lg:px-4 lg:py-2 lg:text-xs">View Deal</Link>
                   </div>
                 </div>
               </article>
