@@ -94,7 +94,7 @@ export default function HotelsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-3 px-3 py-3 pb-16 md:space-y-6 md:px-4 md:py-7 md:pb-8">
+    <div className="mx-auto max-w-6xl space-y-3 px-3 py-3 pb-8 md:space-y-6 md:px-4 md:py-7 md:pb-8">
       <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="card space-y-2.5 border-blue-100/70 bg-gradient-to-br from-[#e9f3ff] via-white to-[#f7fbff] p-3.5 dark:border-slate-700 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
         <div className="flex items-center justify-between">
           <h1 className="font-display text-[22px] font-bold sm:text-2xl">Hotel Listings</h1>

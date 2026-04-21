@@ -85,7 +85,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-4 px-3 py-3 pb-16 md:space-y-8 md:px-4 md:py-7 md:pb-10">
+    <div className="mx-auto max-w-5xl space-y-4 px-3 py-3 pb-8 md:space-y-8 md:px-4 md:py-7 md:pb-10">
       <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="card overflow-hidden border-blue-100/70 bg-gradient-to-br from-[#eaf4ff] via-white to-[#f7fbff] p-3.5 dark:border-slate-700/50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 sm:p-5">
         <div className="mb-2.5 flex items-center justify-between">
           <div>

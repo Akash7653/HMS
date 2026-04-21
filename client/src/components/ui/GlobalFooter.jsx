@@ -2,23 +2,24 @@
 
 export default function GlobalFooter() {
   return (
-    <footer className="mt-2 border-t border-slate-200/70 bg-white/40 pb-[calc(6.75rem+var(--safe-bottom))] dark:border-slate-700/60 dark:bg-slate-950/30 md:mt-6 md:pb-0">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 overflow-x-auto px-3 py-2.5 md:hidden">
-        <div className="shrink-0">
-          <BrandLogo textClassName="text-sm" />
-        </div>
-        <div className="shrink-0 rounded-full border border-slate-200/70 bg-white/70 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
-          Hotels
-        </div>
-        <div className="shrink-0 rounded-full border border-slate-200/70 bg-white/70 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
-          Support
-        </div>
-        <div className="shrink-0 rounded-full border border-slate-200/70 bg-white/70 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">
-          Policies
+    <footer className="mt-0 border-t border-slate-200/70 bg-gradient-to-b from-white/55 via-cyan-50/35 to-white/60 pb-[calc(6.25rem+var(--safe-bottom))] dark:border-slate-700/60 dark:from-slate-950/40 dark:via-slate-900/35 dark:to-slate-950/45 md:mt-4 md:pb-0">
+      <div className="mx-auto max-w-7xl px-3 pt-2 md:hidden">
+        <div className="rounded-2xl border border-white/70 bg-white/80 px-3 py-2 shadow-sm backdrop-blur-md dark:border-slate-700/60 dark:bg-slate-900/75">
+          <div className="flex items-center justify-between gap-2">
+            <BrandLogo textClassName="text-sm" />
+            <span className="rounded-full bg-cyan-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300">
+              24x7 Support
+            </span>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            <span className="rounded-full border border-slate-200/70 bg-white/90 px-2 py-0.5 text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">Trusted Stays</span>
+            <span className="rounded-full border border-slate-200/70 bg-white/90 px-2 py-0.5 text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">Secure Payments</span>
+            <span className="rounded-full border border-slate-200/70 bg-white/90 px-2 py-0.5 text-[11px] font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300">Fast Refunds</span>
+          </div>
         </div>
       </div>
 
-      <div className="mx-auto hidden max-w-7xl gap-8 px-4 py-10 md:grid md:grid-cols-2 xl:grid-cols-4">
+      <div className="mx-auto hidden max-w-7xl gap-6 px-4 py-8 md:grid md:grid-cols-2 xl:grid-cols-4">
         <div className="space-y-3">
           <BrandLogo textClassName="text-xl" />
           <p className="max-w-sm text-sm text-slate-600 dark:text-slate-300">
@@ -58,7 +59,7 @@ export default function GlobalFooter() {
 
       </div>
 
-      <div className="border-t border-slate-200/70 px-4 py-4 text-center text-sm text-slate-500 dark:border-slate-700/50 dark:text-slate-400">
+      <div className="border-t border-slate-200/70 px-4 py-3 text-center text-sm text-slate-500 dark:border-slate-700/50 dark:text-slate-400">
         2026 Horizon-Hotels. All rights reserved.
       </div>
     </footer>
