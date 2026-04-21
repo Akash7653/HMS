@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { memo, useMemo, useState } from "react";
 
-const FALLBACK_IMAGE = "https://placehold.co/800x450?text=Hotel";
+const FALLBACK_IMAGE = "https://images.pexels.com/photos/258154/pexels-photo-258154.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop";
+const FALLBACK_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 450'%3E%3Crect fill='%23e2e8f0' width='800' height='450'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%2394a3b8' font-size='24' font-family='system-ui'%3EHotel Image%3C/text%3E%3C/svg%3E";
 
 function getOptimizedImageSet(rawSrc) {
   const src = rawSrc || FALLBACK_IMAGE;
@@ -13,7 +14,7 @@ function getOptimizedImageSet(rawSrc) {
         src,
         srcSet: "",
         sizes: "",
-        placeholder: src,
+        placeholder: FALLBACK_PLACEHOLDER,
       };
     }
 
@@ -28,17 +29,19 @@ function getOptimizedImageSet(rawSrc) {
     };
   } catch {
     return {
-      src,
+      src: FALLBACK_IMAGE,
       srcSet: "",
       sizes: "",
-      placeholder: src,
+      placeholder: FALLBACK_PLACEHOLDER,
     };
   }
 }
 
 function ProgressiveHotelImage({ src, alt }) {
   const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
   const optimized = useMemo(() => getOptimizedImageSet(src), [src]);
+  const displaySrc = failed ? FALLBACK_IMAGE : optimized.src;
 
   return (
     <div className="relative h-44 w-full overflow-hidden rounded-xl bg-slate-200/70 dark:bg-slate-800/70">
@@ -49,13 +52,17 @@ function ProgressiveHotelImage({ src, alt }) {
         className={`absolute inset-0 h-full w-full scale-105 object-cover blur-md transition-opacity duration-400 ${loaded ? "opacity-0" : "opacity-100"}`}
       />
       <img
-        src={optimized.src}
+        src={displaySrc}
         srcSet={optimized.srcSet || undefined}
         sizes={optimized.sizes || undefined}
         alt={alt}
         loading="lazy"
         decoding="async"
         onLoad={() => setLoaded(true)}
+        onError={() => {
+          setLoaded(true);
+          setFailed(true);
+        }}
         className={`absolute inset-0 h-full w-full object-cover transition-all duration-500 ease-out ${loaded ? "opacity-100 blur-0" : "opacity-0 blur-sm"} group-hover:scale-[1.01]`}
       />
     </div>
