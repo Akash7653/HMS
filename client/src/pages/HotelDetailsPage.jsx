@@ -154,7 +154,7 @@ export default function HotelDetailsPage() {
           key: paymentConfig.razorpay.keyId,
           amount: orderRes.data.amount,
           currency: orderRes.data.currency,
-          name: "Horizon HMS",
+          name: "Horizon-Hotels",
           description: `${hotel.name} booking`,
           order_id: orderRes.data.orderId,
           prefill: {
@@ -305,7 +305,7 @@ export default function HotelDetailsPage() {
     : [`https://placehold.co/1200x800?text=${encodeURIComponent(hotel?.name || "Hotel")}`];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-8">
+    <div className="mx-auto max-w-7xl space-y-4 px-3 py-4 pb-28 md:space-y-6 md:px-4 md:py-8">
       <button
         type="button"
         onClick={() => navigate("/hotels")}
@@ -315,24 +315,24 @@ export default function HotelDetailsPage() {
         Back to Hotels
       </button>
 
-      <section className="card space-y-3 bg-gradient-to-br from-white via-slate-50 to-cyan-50/70 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+      <section className="card space-y-2.5 bg-gradient-to-br from-white via-slate-50 to-cyan-50/70 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand-700 dark:text-brand-300">Featured stay</p>
-            <h1 className="font-display text-3xl font-bold bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent sm:text-4xl">{hotel.name}</h1>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-700 dark:text-brand-300">Featured stay</p>
+            <h1 className="font-display text-[24px] font-bold leading-tight bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent sm:text-4xl">{hotel.name}</h1>
           </div>
-          <span className="rounded-full bg-white/80 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm dark:bg-slate-800/80 dark:text-slate-200">
+          <span className="rounded-full bg-white/80 px-3 py-1.5 text-[11px] font-semibold text-slate-700 shadow-sm dark:bg-slate-800/80 dark:text-slate-200 sm:text-sm">
             {hotel.location?.city}, {hotel.location?.country}
           </span>
         </div>
-        <p className="max-w-3xl text-slate-600 dark:text-slate-300">{hotel.description}</p>
+        <p className="max-w-3xl text-[13px] text-slate-600 dark:text-slate-300 sm:text-sm">{hotel.description}</p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {galleryImages.map((img, index) => (
             <img
               key={`${img}-${index}`}
               src={img}
               alt={`${hotel.name} ${index + 1}`}
-              className="h-48 w-full rounded-xl object-cover shadow-lg"
+              className="h-40 w-full rounded-xl object-cover shadow-lg sm:h-48"
               loading="lazy"
               onError={(e) => {
                 e.currentTarget.src = `https://placehold.co/1200x800?text=${encodeURIComponent(hotel.name)}`;
@@ -350,17 +350,35 @@ export default function HotelDetailsPage() {
         <button type="button" className="btn-secondary" onClick={toggleWishlist}>Add/Remove Wishlist</button>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <div className="card space-y-3 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
-          <h2 className="font-display text-xl font-semibold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent sm:text-2xl">Book this hotel</h2>
+      <section className="grid gap-3 lg:grid-cols-2">
+        <div className="card space-y-2.5 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">
+          <h2 className="font-display text-lg font-semibold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent sm:text-2xl">Book this hotel</h2>
+          <div className="flex flex-wrap gap-2">
+            {rooms.map((r) => (
+              <button
+                key={`${r.type}-chip`}
+                type="button"
+                onClick={() => setBooking((p) => ({ ...p, roomType: r.type }))}
+                className={`rounded-full border px-3 py-1 text-[11px] font-semibold ${booking.roomType === r.type ? "border-blue-500 bg-blue-50 text-blue-700" : "border-slate-300 text-slate-600 dark:border-slate-700 dark:text-slate-300"}`}
+              >
+                {r.type}
+              </button>
+            ))}
+          </div>
           <select className="input" value={booking.roomType} onChange={(e) => setBooking((p) => ({ ...p, roomType: e.target.value }))}>
             {rooms.map((r) => (
               <option key={r.type} value={r.type}>{r.type} - Rs. {r.basePrice}</option>
             ))}
           </select>
           <div className="grid gap-2 sm:grid-cols-2">
-            <input className="input" type="date" value={booking.checkIn} onChange={(e) => setBooking((p) => ({ ...p, checkIn: e.target.value }))} />
-            <input className="input" type="date" value={booking.checkOut} onChange={(e) => setBooking((p) => ({ ...p, checkOut: e.target.value }))} />
+            <label className="space-y-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+              Start Date
+              <input className="input" type="date" value={booking.checkIn} onChange={(e) => setBooking((p) => ({ ...p, checkIn: e.target.value }))} />
+            </label>
+            <label className="space-y-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+              End Date
+              <input className="input" type="date" value={booking.checkOut} onChange={(e) => setBooking((p) => ({ ...p, checkOut: e.target.value }))} />
+            </label>
           </div>
           <input className="input" type="number" min="1" max="10" value={booking.guests} onChange={(e) => setBooking((p) => ({ ...p, guests: Number(e.target.value) }))} />
           <div className="rounded-2xl border border-cyan-200/60 bg-gradient-to-r from-cyan-50 to-blue-50 px-4 py-3 text-sm text-slate-700 shadow-sm dark:border-cyan-900/50 dark:from-slate-900 dark:to-slate-800 dark:text-slate-200">
@@ -381,6 +399,13 @@ export default function HotelDetailsPage() {
           ) : null}
           <button type="button" className="btn-primary bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 shadow-lg" onClick={() => setShowBookingModal(true)}>
             Open Payment Window
+          </button>
+          <button
+            type="button"
+            className="btn-primary bg-gradient-to-r from-orange-500 to-amber-500"
+            onClick={() => navigate(`/checkout/${id}`, { state: { hotel, booking } })}
+          >
+            Continue to Full Checkout
           </button>
         </div>
 
@@ -480,6 +505,17 @@ export default function HotelDetailsPage() {
           <button className="btn-primary w-full" type="submit">Submit Review</button>
         </form>
       </GlassModal>
+
+      <div className="safe-bottom-above-nav fixed inset-x-0 z-30 px-3 md:hidden">
+        <button
+          type="button"
+          className="tap-target btn-primary w-full bg-gradient-to-r from-orange-500 to-emerald-500 py-2.5 text-sm font-bold shadow-xl"
+          onClick={() => navigate(`/checkout/${id}`, { state: { hotel, booking } })}
+        >
+          Book Now
+        </button>
+      </div>
     </div>
   );
 }
+

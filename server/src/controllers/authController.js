@@ -1,4 +1,4 @@
-const User = require("../models/User");
+﻿const User = require("../models/User");
 const { signToken } = require("../utils/jwt");
 const { sendEmailSimulation } = require("../services/emailService");
 const { sendSmsOtp } = require("../services/smsService");
@@ -36,7 +36,7 @@ exports.register = async (req, res, next) => {
 
     await sendEmailSimulation({
       to: email,
-      subject: "Horizon HMS registration initiated",
+      subject: "Horizon-Hotels registration initiated",
       html: `<p>Your account setup has started. Please complete phone OTP verification to activate your account.</p>`,
     });
 
@@ -129,7 +129,7 @@ exports.resendOtp = async (req, res, next) => {
 
     await sendEmailSimulation({
       to: email,
-      subject: "Your new Horizon HMS verification OTP",
+      subject: "Your new Horizon-Hotels verification OTP",
       html: `<p>Your phone OTP has been regenerated. Please use the latest OTP sent to your mobile.</p>`,
     });
 
@@ -217,7 +217,7 @@ exports.updateProfile = async (req, res, next) => {
 
       await sendEmailSimulation({
         to: user.email,
-        subject: "Verify updated Horizon HMS contact details",
+        subject: "Verify updated Horizon-Hotels contact details",
         html: `<p>Your profile was updated. Please complete phone OTP verification to continue secure access.</p>`,
       });
 
@@ -245,3 +245,4 @@ exports.updateProfile = async (req, res, next) => {
     next(error);
   }
 };
+

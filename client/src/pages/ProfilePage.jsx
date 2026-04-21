@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function ProfilePage() {
@@ -62,6 +63,11 @@ export default function ProfilePage() {
         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${isVerified ? "bg-cyan-100 text-cyan-700" : "bg-slate-200 text-slate-700"}`}>
           Security {isVerified ? "Strong" : "Pending Verification"}
         </span>
+      </div>
+
+      <div className="mb-4 grid grid-cols-2 gap-2">
+        <Link to="/bookings" className="btn-secondary text-center">My Bookings</Link>
+        <Link to="/wishlist" className="btn-secondary text-center">Wishlist</Link>
       </div>
 
       <form onSubmit={onSave} className="card grid gap-3 p-6 sm:grid-cols-2">

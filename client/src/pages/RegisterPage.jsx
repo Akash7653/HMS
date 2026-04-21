@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
@@ -58,7 +58,7 @@ export default function RegisterPage() {
       setContact({ email: form.email, phone: form.phone });
       localStorage.setItem("hms_pending_verification_email", form.email);
       setShowOtpPanel(true);
-      showAuthSuccessToast("📲 OTP sent successfully", "Check your phone and verify to complete signup ✨");
+      showAuthSuccessToast("OTP sent successfully", "Check your phone and verify to complete signup.");
     } catch (error) {
       toast.error(resolveErrorMessage(error, "Registration failed"));
     }
@@ -76,7 +76,7 @@ export default function RegisterPage() {
       setIsVerified(true);
       setShowOtpPanel(false);
       localStorage.removeItem("hms_pending_verification_email");
-      showAuthSuccessToast("✅ Registration complete", "Phone verified. Redirecting you to hotels 🎉");
+      showAuthSuccessToast("Registration complete", "Phone verified. Redirecting you to hotels.");
       navigate("/hotels");
     } catch (error) {
       toast.error(resolveErrorMessage(error, "OTP verification failed"));
@@ -110,7 +110,7 @@ export default function RegisterPage() {
           <div className="space-y-3">
             <h1 className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-display text-3xl font-bold leading-tight text-transparent sm:text-4xl md:text-5xl">Create your verified account</h1>
             <p className="text-slate-600 dark:text-slate-300">
-              Join Horizon HMS and enjoy seamless hotel bookings with enhanced security and exclusive features.
+              Join Horizon-Hotels and enjoy seamless hotel bookings with enhanced security and exclusive features.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-1">
@@ -198,13 +198,16 @@ export default function RegisterPage() {
         
         {isVerified && (
           <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-center text-sm font-semibold text-emerald-700 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-            ✓ Phone verified! Ready to create account
+            Verified: Phone is confirmed and account is ready
           </div>
         )}
         
-        <p className="text-sm text-slate-600 dark:text-slate-300">
-          Already have an account? <Link className="font-semibold text-brand-700" to="/login">Login</Link>
-        </p>
+        <div className="space-y-2 text-center">
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Already have an account? <Link className="font-semibold text-brand-700" to="/login">Login</Link>
+          </p>
+          <button type="button" className="btn-secondary w-full" onClick={() => navigate("/login")}>Go to Login</button>
+        </div>
         </div>
       </motion.form>
 
@@ -243,3 +246,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

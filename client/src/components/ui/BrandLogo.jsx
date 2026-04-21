@@ -1,4 +1,4 @@
-export default function BrandLogo({ size = 34, withText = true, textClassName = "", bubbleText = false }) {
+﻿export default function BrandLogo({ size = 34, withText = true, textClassName = "", bubbleText = false }) {
   return (
     <div className="inline-flex items-center gap-2">
       <svg
@@ -6,7 +6,7 @@ export default function BrandLogo({ size = 34, withText = true, textClassName = 
         height={size}
         viewBox="0 0 48 48"
         role="img"
-        aria-label="Horizon HMS logo"
+        aria-label="Horizon-Hotels logo"
         className="rounded-2xl shadow-xl shadow-cyan-500/30 ring-1 ring-white/60 dark:ring-slate-700/50"
       >
         <defs>
@@ -27,14 +27,15 @@ export default function BrandLogo({ size = 34, withText = true, textClassName = 
       {withText ? (
         bubbleText ? (
           <span className={`rounded-full border border-cyan-200/70 bg-gradient-to-r from-white/90 via-cyan-50/95 to-blue-50/90 px-3 py-1 font-display text-lg font-bold tracking-tight text-cyan-800 shadow-sm dark:border-slate-700/60 dark:from-slate-900/85 dark:via-slate-800/85 dark:to-slate-900/85 dark:text-cyan-300 ${textClassName}`}>
-            Horizon HMS
+            Horizon-Hotels
           </span>
         ) : (
           <span className={`bubble-title font-display text-xl font-bold tracking-tight bg-gradient-to-r from-cyan-600 via-blue-600 to-violet-600 bg-clip-text text-transparent ${textClassName}`}>
-            Horizon HMS
+            Horizon-Hotels
           </span>
         )
       ) : null}
     </div>
   );
 }
+

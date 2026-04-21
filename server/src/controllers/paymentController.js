@@ -1,4 +1,4 @@
-const Payment = require("../models/Payment");
+﻿const Payment = require("../models/Payment");
 const Booking = require("../models/Booking");
 const Hotel = require("../models/Hotel");
 const { calculateDynamicPrice } = require("../services/pricingService");
@@ -10,12 +10,12 @@ const { sendSms } = require("../services/smsService");
 async function dispatchBookingPaidNotifications({ user, booking, hotelName, paymentReference }) {
   const emailHtml = `<div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.6"><h2>Your booking is confirmed</h2><p><strong>Hotel:</strong> ${hotelName}</p><p><strong>Room:</strong> ${booking.roomType}</p><p><strong>Dates:</strong> ${booking.checkIn} to ${booking.checkOut}</p><p><strong>Guests:</strong> ${booking.guests}</p><p><strong>Amount:</strong> Rs. ${booking.totalPrice}</p><p><strong>Payment Ref:</strong> ${paymentReference}</p></div>`;
 
-  const smsText = `Horizon HMS: Booking confirmed at ${hotelName}. ${booking.checkIn} to ${booking.checkOut}, ${booking.roomType}, guests ${booking.guests}, amount Rs. ${booking.totalPrice}. Ref: ${paymentReference}.`;
+  const smsText = `Horizon-Hotels: Booking confirmed at ${hotelName}. ${booking.checkIn} to ${booking.checkOut}, ${booking.roomType}, guests ${booking.guests}, amount Rs. ${booking.totalPrice}. Ref: ${paymentReference}.`;
 
   const results = await Promise.allSettled([
     sendEmail({
       to: user.email,
-      subject: "Booking Confirmed - Horizon HMS",
+      subject: "Booking Confirmed - Horizon-Hotels",
       html: emailHtml,
     }),
     sendSms({ phone: user.phone, body: smsText }),
@@ -296,3 +296,4 @@ exports.recordFailedRazorpayPayment = async (req, res, next) => {
     next(error);
   }
 };
+

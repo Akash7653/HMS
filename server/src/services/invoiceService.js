@@ -1,11 +1,11 @@
-const PDFDocument = require("pdfkit");
+﻿const PDFDocument = require("pdfkit");
 const { sendEmail } = require("./emailService");
 
 function addHeader(doc, title) {
   doc
     .fontSize(28)
     .font("Helvetica-Bold")
-    .text("HORIZON HMS", 50, 50)
+    .text("Horizon-Hotels", 50, 50)
     .fontSize(10)
     .font("Helvetica")
     .text("Hotel Management System", 50, 85)
@@ -72,7 +72,7 @@ function addItemsTable(doc, payment) {
     .fontSize(9)
     .font("Helvetica")
     .text(`${payment.hotelName || "Hotel Booking"}`, 60, tableY + itemHeight + 5)
-    .text(`₹${payment.amount.toFixed(2)}`, 450, tableY + itemHeight + 5, { align: "right" });
+    .text(`Rs. ${payment.amount.toFixed(2)}`, 450, tableY + itemHeight + 5, { align: "right" });
 
   // Separator line
   doc
@@ -85,7 +85,7 @@ function addItemsTable(doc, payment) {
     .fontSize(12)
     .font("Helvetica-Bold")
     .text("TOTAL AMOUNT", 60, tableY + itemHeight * 2 + 15)
-    .text(`₹${payment.amount.toFixed(2)}`, 450, tableY + itemHeight * 2 + 15, { align: "right" });
+    .text(`Rs. ${payment.amount.toFixed(2)}`, 450, tableY + itemHeight * 2 + 15, { align: "right" });
 }
 
 function addPaymentInfo(doc, payment) {
@@ -120,7 +120,7 @@ function addFooter(doc) {
     .font("Helvetica")
     .fillColor("#64748B")
     .text(
-      "Thank you for booking with Horizon HMS. For support, contact: support@horizonhms.com",
+      "Thank you for booking with Horizon-Hotels. For support, contact: support@horizonhms.com",
       50,
       pageHeight - 50,
       { align: "center" }
@@ -159,20 +159,20 @@ exports.sendInvoiceEmail = async (payment, userEmail) => {
 
     await sendEmail({
       to: userEmail,
-      subject: `${payment.status === "refunded" ? "Refund" : "Payment"} Receipt - Horizon HMS`,
+      subject: `${payment.status === "refunded" ? "Refund" : "Payment"} Receipt - Horizon-Hotels`,
       html: `
         <h2>${payment.status === "refunded" ? "Refund Processed" : "Payment Confirmed"}</h2>
         <p>Dear Customer,</p>
         <p>${
           payment.status === "refunded"
-            ? `Your refund of ₹${payment.amount.toFixed(2)} has been processed.`
-            : `Your payment of ₹${payment.amount.toFixed(2)} has been received successfully.`
+            ? `Your refund of Rs. ${payment.amount.toFixed(2)} has been processed.`
+            : `Your payment of Rs. ${payment.amount.toFixed(2)} has been received successfully.`
         }</p>
         <p><strong>Reference:</strong> ${payment.reference}</p>
         <p><strong>Date:</strong> ${new Date(payment.createdAt).toLocaleDateString("en-IN")}</p>
         <p>Your invoice is attached to this email.</p>
         <p>Thank you for your business!</p>
-        <p>Regards,<br>Horizon HMS Team</p>
+        <p>Regards,<br>Horizon-Hotels Team</p>
       `,
       attachments: [
         {
@@ -190,3 +190,4 @@ exports.sendInvoiceEmail = async (payment, userEmail) => {
     return false;
   }
 };
+

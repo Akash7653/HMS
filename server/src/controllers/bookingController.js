@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+﻿const mongoose = require("mongoose");
 const Booking = require("../models/Booking");
 const Hotel = require("../models/Hotel");
 const Payment = require("../models/Payment");
@@ -15,12 +15,12 @@ const {
 async function dispatchBookingNotifications({ user, hotel, booking, paymentReference }) {
   const emailHtml = `<div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.6"><h2>Your booking is confirmed</h2><p><strong>Hotel:</strong> ${hotel.name}</p><p><strong>Room:</strong> ${booking.roomType}</p><p><strong>Dates:</strong> ${booking.checkIn} to ${booking.checkOut}</p><p><strong>Guests:</strong> ${booking.guests}</p><p><strong>Amount:</strong> Rs. ${booking.totalPrice}</p><p><strong>Payment Ref:</strong> ${paymentReference || "Will be shared after Razorpay payment"}</p></div>`;
 
-  const smsText = `Horizon HMS: Booking confirmed at ${hotel.name}. ${booking.checkIn} to ${booking.checkOut}, ${booking.roomType}, guests ${booking.guests}, amount Rs. ${booking.totalPrice}. Ref: ${paymentReference || "pending"}.`;
+  const smsText = `Horizon-Hotels: Booking confirmed at ${hotel.name}. ${booking.checkIn} to ${booking.checkOut}, ${booking.roomType}, guests ${booking.guests}, amount Rs. ${booking.totalPrice}. Ref: ${paymentReference || "pending"}.`;
 
   const results = await Promise.allSettled([
     sendEmail({
       to: user.email,
-      subject: "Booking Confirmed - Horizon HMS",
+      subject: "Booking Confirmed - Horizon-Hotels",
       html: emailHtml,
     }),
     sendSms({ phone: user.phone, body: smsText }),
@@ -35,12 +35,12 @@ async function dispatchBookingNotifications({ user, hotel, booking, paymentRefer
 async function dispatchCancellationNotifications({ user, booking, refundReference }) {
   const emailHtml = `<div style="font-family:Arial,sans-serif;color:#0f172a;line-height:1.6"><h2>Your booking was cancelled</h2><p><strong>Hotel:</strong> ${booking.hotel.name}</p><p><strong>Dates:</strong> ${booking.checkIn} to ${booking.checkOut}</p><p><strong>Refund status:</strong> Initiated</p><p><strong>Amount:</strong> Rs. ${booking.totalPrice}</p><p><strong>Reference:</strong> ${refundReference}</p></div>`;
 
-  const smsText = `Horizon HMS: Booking cancelled for ${booking.hotel.name}. Refund initiated for Rs. ${booking.totalPrice}. Ref: ${refundReference}.`;
+  const smsText = `Horizon-Hotels: Booking cancelled for ${booking.hotel.name}. Refund initiated for Rs. ${booking.totalPrice}. Ref: ${refundReference}.`;
 
   const results = await Promise.allSettled([
     sendEmail({
       to: user.email,
-      subject: "Booking Cancelled - Horizon HMS",
+      subject: "Booking Cancelled - Horizon-Hotels",
       html: emailHtml,
     }),
     sendSms({ phone: user.phone, body: smsText }),
@@ -249,3 +249,4 @@ exports.streamAvailability = (req, res) => {
     unsubscribe(res);
   });
 };
+

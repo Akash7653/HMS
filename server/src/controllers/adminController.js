@@ -99,11 +99,15 @@ exports.getAnalytics = async (_req, res, next) => {
     const occupancyRate = totalInventory > 0
       ? Math.min((totalBookedNights / (totalInventory * 30)) * 100, 100)
       : 0;
+    const activeHotels = hotels.length;
+    const cityCount = new Set(hotels.map((hotel) => hotel.location?.city).filter(Boolean)).size;
 
     res.json({
       totalRevenue: revenueAgg[0]?.totalRevenue || 0,
       occupancyRate: Number(occupancyRate.toFixed(2)),
       confirmedBookings,
+      activeHotels,
+      cityCount,
       popularRooms: popularRoomsAgg,
     });
   } catch (error) {

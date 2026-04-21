@@ -1,4 +1,4 @@
-function normalizePhone(phone) {
+﻿function normalizePhone(phone) {
   const digits = String(phone || "").replace(/\D/g, "");
   if (!digits) return "";
   if (digits.startsWith("91") && digits.length === 12) return `+${digits}`;
@@ -53,6 +53,7 @@ async function sendSms({ phone, body }) {
 exports.sendSms = sendSms;
 
 exports.sendSmsOtp = async ({ phone, otp, reason = "verification" }) => {
-  const body = `Horizon HMS OTP for ${reason}: ${otp}. Valid for 10 minutes.`;
+  const body = `Horizon-Hotels OTP for ${reason}: ${otp}. Valid for 10 minutes.`;
   return sendSms({ phone, body });
 };
+

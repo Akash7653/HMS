@@ -34,7 +34,9 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-5">
+        <article className="card"><h3 className="text-sm">Hotels</h3><p className="text-2xl font-bold">{analytics.activeHotels}</p></article>
+        <article className="card"><h3 className="text-sm">Cities</h3><p className="text-2xl font-bold">{analytics.cityCount}</p></article>
         <article className="card"><h3 className="text-sm">Revenue</h3><p className="text-2xl font-bold">Rs. {analytics.totalRevenue}</p></article>
         <article className="card"><h3 className="text-sm">Occupancy Rate</h3><p className="text-2xl font-bold">{analytics.occupancyRate}%</p></article>
         <article className="card"><h3 className="text-sm">Confirmed Bookings</h3><p className="text-2xl font-bold">{analytics.confirmedBookings}</p></article>

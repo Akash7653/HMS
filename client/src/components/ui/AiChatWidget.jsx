@@ -193,7 +193,7 @@ export default function AiChatWidget() {
   };
 
   return (
-    <div className="fixed bottom-3 left-3 right-3 z-50 sm:bottom-5 sm:left-5 sm:right-auto">
+    <div className="safe-bottom-above-nav fixed left-3 right-3 z-50 sm:bottom-5 sm:left-5 sm:right-auto">
       <AnimatePresence>
         {open ? (
           <motion.div
@@ -294,7 +294,7 @@ export default function AiChatWidget() {
         transition={highlightLauncher && !open ? { duration: 1.4, repeat: Infinity, ease: "easeInOut" } : { duration: 0.2 }}
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="relative inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-xl shadow-cyan-500/30"
+        className="tap-target relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-xl shadow-cyan-500/30"
       >
         {highlightLauncher && !open ? (
           <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-400 px-1 text-[10px] font-extrabold text-slate-900">

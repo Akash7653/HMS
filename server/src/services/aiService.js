@@ -1,4 +1,4 @@
-async function getAiResponse({ message, history = [], userContext = {} }) {
+﻿async function getAiResponse({ message, history = [], userContext = {} }) {
   const apiKey = process.env.OPENAI_API_KEY || "";
   const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
 
@@ -25,7 +25,7 @@ async function getAiResponse({ message, history = [], userContext = {} }) {
       {
         role: "system",
         content:
-          "You are Horizon HMS AI concierge. Keep answers concise, friendly, and practical for hotel search, booking, payments, and cancellations. Prefer clear steps and short bullet points where useful.",
+          "You are Horizon-Hotels AI concierge. Keep answers concise, friendly, and practical for hotel search, booking, payments, and cancellations. Prefer clear steps and short bullet points where useful.",
       },
       { role: "system", content: contextLine },
       ...compactHistory,
@@ -75,3 +75,4 @@ async function getAiResponse({ message, history = [], userContext = {} }) {
 module.exports = {
   getAiResponse,
 };
+
