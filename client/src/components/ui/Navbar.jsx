@@ -46,10 +46,6 @@ export default function Navbar({ darkMode, onToggleTheme }) {
 
   const mobileIconBtnClass = "tap-target flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-200/70 bg-white/80 text-base font-bold text-cyan-700 transition hover:shadow-md dark:border-slate-700 dark:bg-slate-900/70 dark:text-cyan-300";
 
-  const onNotifications = () => {
-    toast("No new notifications right now.", { icon: "🔔" });
-  };
-
   const navItemClass = ({ isActive }) => {
     const active = isActive ? "text-cyan-800 shadow-sm dark:text-cyan-300" : "text-slate-600 dark:text-slate-300";
     return `relative rounded-full border border-cyan-200/60 bg-gradient-to-r from-white/90 via-cyan-50/95 to-blue-50/90 px-3 py-2 text-center text-sm font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-700/60 dark:from-slate-900/85 dark:via-slate-800/85 dark:to-slate-900/85 ${active}`;
@@ -87,14 +83,6 @@ export default function Navbar({ darkMode, onToggleTheme }) {
             className={mobileIconBtnClass}
           >
             {darkMode ? "☀️" : "🌙"}
-          </button>
-          <button
-            type="button"
-            onClick={onNotifications}
-            title="Notifications"
-            className={mobileIconBtnClass}
-          >
-            🔔
           </button>
           {user && (
             <>
