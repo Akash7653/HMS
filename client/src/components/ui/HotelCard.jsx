@@ -44,7 +44,7 @@ function ProgressiveHotelImage({ src, alt }) {
   const displaySrc = failed ? FALLBACK_IMAGE : optimized.src;
 
   return (
-    <div className="relative h-44 w-full overflow-hidden rounded-xl bg-slate-200/70 dark:bg-slate-800/70">
+    <div className="relative h-44 w-full overflow-hidden rounded-xl bg-slate-200/70 dark:bg-slate-800/70 lg:h-48 xl:h-44 2xl:h-48">
       <img
         src={optimized.placeholder}
         alt=""
@@ -75,8 +75,8 @@ function HotelCard({ hotel }) {
   return (
     <article className="card group hover-lift overflow-hidden" style={{ contentVisibility: "auto", containIntrinsicSize: "320px" }}>
       <ProgressiveHotelImage src={hotel.images?.[0]} alt={hotel.name} />
-      <div className="mt-2 space-y-1.5">
-        <h3 className="line-clamp-1 font-display text-[15px] font-semibold md:text-lg">{hotel.name}</h3>
+      <div className="mt-2 space-y-1.5 lg:mt-2.5 lg:space-y-2">
+        <h3 className="line-clamp-1 font-display text-[15px] font-semibold md:text-lg xl:text-[19px]">{hotel.name}</h3>
         <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
           <span className="rounded-full bg-slate-100 px-2 py-1 font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{hotel.location.city}, {hotel.location.country}</span>
           <span className="rounded-full bg-brand-100 px-2 py-1 font-semibold text-brand-800 dark:bg-brand-900/50 dark:text-brand-200">
@@ -85,10 +85,10 @@ function HotelCard({ hotel }) {
         </div>
         <div className="flex items-end justify-between pt-0.5">
           <div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">Per night from</p>
-            <p className="text-[13px] font-bold text-brand-700 dark:text-brand-300">Rs. {minPrice}</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 lg:text-xs">Per night from</p>
+            <p className="text-[13px] font-bold text-brand-700 dark:text-brand-300 lg:text-[15px]">Rs. {minPrice}</p>
           </div>
-          <Link to={`/hotels/${hotel._id}`} className="rounded-full bg-gradient-to-r from-[#0f274f] to-[#056ecf] px-3.5 py-1.5 text-[11px] font-bold text-white shadow-lg shadow-blue-500/20">
+          <Link to={`/hotels/${hotel._id}`} className="rounded-full bg-gradient-to-r from-[#0f274f] to-[#056ecf] px-3.5 py-1.5 text-[11px] font-bold text-white shadow-lg shadow-blue-500/20 lg:px-4 lg:py-2 lg:text-xs">
             Select Room
           </Link>
         </div>

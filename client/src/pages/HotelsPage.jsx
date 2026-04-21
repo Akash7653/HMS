@@ -94,11 +94,15 @@ export default function HotelsPage() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-3 px-3 py-3 pb-8 md:space-y-6 md:px-4 md:py-7 md:pb-8">
-      <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="card space-y-2.5 border-blue-100/70 bg-gradient-to-br from-[#e9f3ff] via-white to-[#f7fbff] p-3.5 dark:border-slate-700 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800">
+    <div className="mx-auto max-w-7xl space-y-3 px-3 py-3 pb-8 md:space-y-6 md:px-4 md:py-7 md:pb-8 lg:px-6 xl:px-8">
+      <div className="space-y-3 lg:grid lg:grid-cols-[320px_minmax(0,1fr)] lg:items-start lg:gap-5 lg:space-y-0 xl:gap-6">
+      <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="card space-y-2.5 border-blue-100/70 bg-gradient-to-br from-[#e9f3ff] via-white to-[#f7fbff] p-3.5 dark:border-slate-700 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 lg:sticky lg:top-24 lg:space-y-3 lg:p-5">
         <div className="flex items-center justify-between">
-          <h1 className="font-display text-[22px] font-bold sm:text-2xl">Hotel Listings</h1>
-          <button type="button" onClick={() => setShowMap((v) => !v)} className="btn-secondary px-3 py-1.5 text-[11px]">
+          <div>
+            <h1 className="font-display text-[22px] font-bold sm:text-2xl lg:text-3xl">Hotel Listings</h1>
+            <p className="mt-0.5 hidden text-sm text-slate-600 lg:block dark:text-slate-300">Find and compare top stays with smart filters.</p>
+          </div>
+          <button type="button" onClick={() => setShowMap((v) => !v)} className="btn-secondary px-3 py-1.5 text-[11px] lg:px-3.5 lg:py-2 lg:text-xs">
             {showMap ? "Hide Map" : "Map View"}
           </button>
         </div>
@@ -116,7 +120,7 @@ export default function HotelsPage() {
           ))}
         </div>
 
-        <form onSubmit={onSearch} className="space-y-1.5">
+        <form onSubmit={onSearch} className="space-y-1.5 lg:space-y-2">
           <label className="input flex items-center gap-2 py-2.5">
             <span className="text-sm text-slate-400">🔎</span>
             <input
@@ -158,42 +162,50 @@ export default function HotelsPage() {
             ))}
           </div>
 
-          <button type="submit" className="btn-primary w-full bg-gradient-to-r from-blue-600 to-cyan-500 py-2.5 text-sm">Search</button>
+          <button type="submit" className="btn-primary w-full bg-gradient-to-r from-blue-600 to-cyan-500 py-2.5 text-sm lg:py-3">Search</button>
         </form>
 
-        <p className="text-[11px] text-slate-500 dark:text-slate-400">Showing {displayedHotels.length} of {pagination.total || displayedHotels.length} hotels</p>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400 lg:text-xs">Showing {displayedHotels.length} of {pagination.total || displayedHotels.length} hotels</p>
       </motion.section>
 
-      {showMap ? (
-        <section className="card flex h-40 items-center justify-center border-dashed border-slate-300 text-center text-[13px] text-slate-500 dark:border-slate-700 dark:text-slate-300 sm:h-44 sm:text-sm">
-          Interactive map can be connected here. Tap any card below to open details.
-        </section>
-      ) : null}
+      <div className="space-y-3 lg:space-y-4">
+        <div className="hidden items-center justify-between rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3 text-sm text-slate-600 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/65 dark:text-slate-300 lg:flex">
+          <p className="font-semibold">{displayedHotels.length} stays matched</p>
+          <p>Sorted by <span className="font-semibold">{filters.sortBy === "popularity" ? "Newest" : filters.sortBy === "price" ? "Price" : "Rating"}</span></p>
+        </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {loading
-          ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
-          : displayedHotels.map((hotel) => <HotelCard key={hotel._id} hotel={hotel} />)}
+        {showMap ? (
+          <section className="card flex h-40 items-center justify-center border-dashed border-slate-300 text-center text-[13px] text-slate-500 dark:border-slate-700 dark:text-slate-300 sm:h-44 sm:text-sm lg:h-52 lg:text-base">
+            Interactive map can be connected here. Tap any card below to open details.
+          </section>
+        ) : null}
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:gap-4 xl:grid-cols-3 2xl:grid-cols-4">
+          {loading
+            ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
+            : displayedHotels.map((hotel) => <HotelCard key={hotel._id} hotel={hotel} />)}
+        </div>
+
+        <div className="flex items-center justify-center gap-2.5 lg:gap-3">
+          <button
+            type="button"
+            className="btn-secondary px-3.5 py-1.5 text-[12px] sm:px-4 sm:py-2 sm:text-sm lg:px-5 lg:py-2.5"
+            disabled={pagination.page <= 1}
+            onClick={() => setFilters((p) => ({ ...p, page: p.page - 1 }))}
+          >
+            Prev
+          </button>
+          <span className="text-[12px] font-semibold text-slate-600 dark:text-slate-300 sm:text-sm lg:text-base">Page {pagination.page} / {pagination.pages || 1}</span>
+          <button
+            type="button"
+            className="btn-secondary px-3.5 py-1.5 text-[12px] sm:px-4 sm:py-2 sm:text-sm lg:px-5 lg:py-2.5"
+            disabled={pagination.page >= pagination.pages}
+            onClick={() => setFilters((p) => ({ ...p, page: p.page + 1 }))}
+          >
+            Next
+          </button>
+        </div>
       </div>
-
-      <div className="flex items-center justify-center gap-2.5">
-        <button
-          type="button"
-          className="btn-secondary px-3.5 py-1.5 text-[12px] sm:px-4 sm:py-2 sm:text-sm"
-          disabled={pagination.page <= 1}
-          onClick={() => setFilters((p) => ({ ...p, page: p.page - 1 }))}
-        >
-          Prev
-        </button>
-        <span className="text-[12px] font-semibold text-slate-600 dark:text-slate-300 sm:text-sm">Page {pagination.page} / {pagination.pages || 1}</span>
-        <button
-          type="button"
-          className="btn-secondary px-3.5 py-1.5 text-[12px] sm:px-4 sm:py-2 sm:text-sm"
-          disabled={pagination.page >= pagination.pages}
-          onClick={() => setFilters((p) => ({ ...p, page: p.page + 1 }))}
-        >
-          Next
-        </button>
       </div>
     </div>
   );
