@@ -6,24 +6,29 @@
   return phone.startsWith("+") ? phone : `+${digits}`;
 }
 
-async function sendSms({ phone, body }) {
+function shouldUseTwilio() {
+  return Boolean(process.env.TWILIO_ACCOUNT_SID && (process.env.TWILIO_AUTH_TOKEN || process.env.TWILIO_API_KEY_SECRET));
+}
+
+function getProvider() {
+  const configured = (process.env.SMS_PROVIDER || "").trim().toLowerCase();
+  if (configured) return configured;
+  if (shouldUseTwilio()) return "twilio";
+  return "textbelt";
+}
+
+async function sendViaTwilio({ to, body }) {
   const accountSid = process.env.TWILIO_ACCOUNT_SID || "";
   const apiKeySid = process.env.TWILIO_API_KEY_SID || "";
   const apiKeySecret = process.env.TWILIO_API_KEY_SECRET || "";
   const authToken = process.env.TWILIO_AUTH_TOKEN || "";
   const fromNumber = process.env.TWILIO_FROM_NUMBER || "";
 
-  const to = normalizePhone(phone);
-  if (!to) {
-    throw new Error("Invalid phone number for SMS delivery");
-  }
-
   const username = apiKeySid || accountSid;
   const password = apiKeySecret || authToken;
 
   if (!accountSid || !username || !password || !fromNumber) {
-    console.log("[SMS_SIMULATION]", { to, body });
-    return { simulated: true };
+    return { simulated: true, reason: "twilio_not_configured" };
   }
 
   const auth = Buffer.from(`${username}:${password}`).toString("base64");
@@ -58,7 +63,62 @@ async function sendSms({ phone, body }) {
   }
 
   const data = await response.json();
-  return { simulated: false, sid: data.sid };
+  return { simulated: false, provider: "twilio", sid: data.sid };
+}
+
+async function sendViaTextbelt({ to, body }) {
+  const key = process.env.TEXTBELT_KEY || "textbelt";
+
+  const response = await fetch("https://textbelt.com/text", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      phone: to,
+      message: body,
+      key,
+    }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok || !data.success) {
+    const message = data.error || `textbelt_http_${response.status}`;
+
+    // Free keys can hit strict limits quickly. Keep app flow alive for OTP and notifications.
+    if (String(message).toLowerCase().includes("quota") || String(message).toLowerCase().includes("limit")) {
+      return { simulated: true, reason: "textbelt_quota_exceeded" };
+    }
+
+    throw new Error(`SMS sending failed: ${message}`);
+  }
+
+  return { simulated: false, provider: "textbelt", sid: data.textId || "" };
+}
+
+async function sendSms({ phone, body }) {
+  const to = normalizePhone(phone);
+  if (!to) {
+    throw new Error("Invalid phone number for SMS delivery");
+  }
+
+  const provider = getProvider();
+
+  try {
+    if (provider === "twilio") {
+      return await sendViaTwilio({ to, body });
+    }
+    if (provider === "textbelt") {
+      return await sendViaTextbelt({ to, body });
+    }
+
+    console.log("[SMS_SIMULATION_UNKNOWN_PROVIDER]", { provider, to, body });
+    return { simulated: true, reason: "unknown_provider" };
+  } catch (error) {
+    console.log("[SMS_SIMULATION_FALLBACK]", { provider, to, error: error.message });
+    return { simulated: true, reason: "provider_error" };
+  }
 }
 
 exports.sendSms = sendSms;

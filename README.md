@@ -73,3 +73,5 @@ Frontend runs on `http://localhost:5173`, backend on `http://localhost:5000`.
 - Stripe and Razorpay are simulated by default via booking payment reference generation.
 - To enable real email sending, set SMTP credentials in `server/.env`.
 - To enable Cloudinary, set all Cloudinary env vars.
+- SMS provider is configurable using `SMS_PROVIDER` (`textbelt` or `twilio`).
+- For free-tier setup, use `SMS_PROVIDER=textbelt` and `TEXTBELT_KEY=textbelt` (limited quota).
