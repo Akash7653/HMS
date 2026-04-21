@@ -27,27 +27,6 @@ exports.loginValidator = [
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
-exports.verifyContactValidator = [
-  body("email").isEmail().withMessage("Valid email is required"),
-  body("phone")
-    .matches(/^[0-9]{10,15}$/)
-    .withMessage("Phone must be 10 to 15 digits"),
-  body("emailOtp")
-    .optional()
-    .matches(/^[0-9]*$/)
-    .withMessage("Email OTP must be 6 digits"),
-  body("phoneOtp")
-    .matches(/^[0-9]{6}$/)
-    .withMessage("Phone OTP must be 6 digits"),
-];
-
-exports.resendOtpValidator = [
-  body("email").isEmail().withMessage("Valid email is required"),
-  body("phone")
-    .matches(/^[0-9]{10,15}$/)
-    .withMessage("Phone must be 10 to 15 digits"),
-];
-
 exports.updateProfileValidator = [
   body("name").optional().trim().isLength({ min: 2 }).withMessage("Name is too short"),
   body("email").optional().isEmail().withMessage("Valid email is required"),

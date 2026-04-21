@@ -38,18 +38,8 @@ export function AuthProvider({ children }) {
 
   const register = async (payload) => {
     const res = await api.post("/auth/register", payload);
-    return res.data;
-  };
-
-  const verifyContact = async (payload) => {
-    const res = await api.post("/auth/verify-contact", payload);
     localStorage.setItem("hms_token", res.data.token);
     setUser(res.data.user);
-    return res.data;
-  };
-
-  const resendOtp = async (payload) => {
-    const res = await api.post("/auth/resend-otp", payload);
     return res.data;
   };
 
@@ -65,7 +55,7 @@ export function AuthProvider({ children }) {
   };
 
   const value = useMemo(
-    () => ({ user, loading, login, register, verifyContact, resendOtp, refreshMe, updateProfile, logout }),
+    () => ({ user, loading, login, register, refreshMe, updateProfile, logout }),
     [user, loading]
   );
 

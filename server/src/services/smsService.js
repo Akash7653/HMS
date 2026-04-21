@@ -140,8 +140,3 @@ async function sendSms({ phone, body }) {
 
 exports.sendSms = sendSms;
 
-exports.sendSmsOtp = async ({ phone, otp, reason = "verification" }) => {
-  const body = `Horizon-Hotels OTP for ${reason}: ${otp}. Valid for 10 minutes.`;
-  return sendSms({ phone, body });
-};
-

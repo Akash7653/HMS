@@ -7,7 +7,7 @@ import BrandLogo from "../components/ui/BrandLogo";
 import { showAuthSuccessToast } from "../utils/authToasts";
 
 export default function RegisterPage() {
-  const { register, verifyContact, resendOtp } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
   const [form, setForm] = useState({
     name: "",
@@ -18,11 +18,6 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
   });
-  const [phoneOtp, setPhoneOtp] = useState("");
-  const [contact, setContact] = useState({ email: "", phone: "" });
-  const [showOtpPanel, setShowOtpPanel] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
-  const [devOtp, setDevOtp] = useState(null);
 
   const resolveErrorMessage = (error, fallback) => {
     const apiMessage = error?.response?.data?.message;
@@ -31,11 +26,6 @@ export default function RegisterPage() {
   };
 
   const onSubmit = async (e) => {
-    e.preventDefault();
-    requestPhoneOtp(e);
-  };
-
-  const requestPhoneOtp = async (e) => {
     e.preventDefault();
     if (!form.phone) {
       toast.error("Please enter your phone number");
@@ -55,49 +45,11 @@ export default function RegisterPage() {
         country: form.country,
         password: form.password,
       };
-      const registerRes = await register(payload);
-      setContact({ email: form.email, phone: form.phone });
-      localStorage.setItem("hms_pending_verification_email", form.email);
-      setShowOtpPanel(true);
-      setDevOtp(registerRes?.devOtp || null);
-      if (registerRes?.smsFallback) {
-        toast("SMS provider blocked this number. Use OTP shown in-app.", { icon: "⚠️" });
-      }
-      showAuthSuccessToast("OTP sent successfully", "Check your phone and verify to complete signup.");
-    } catch (error) {
-      toast.error(resolveErrorMessage(error, "Registration failed"));
-    }
-  };
-
-  const onVerify = async (e) => {
-    e.preventDefault();
-    if (!phoneOtp) {
-      toast.error("Please enter the OTP");
-      return;
-    }
-
-    try {
-      await verifyContact({ ...contact, phoneOtp, emailOtp: "" });
-      setIsVerified(true);
-      setShowOtpPanel(false);
-      localStorage.removeItem("hms_pending_verification_email");
-      showAuthSuccessToast("Registration complete", "Phone verified. Redirecting you to hotels.");
+      await register(payload);
+      showAuthSuccessToast("Account created successfully", "Your account is ready. Redirecting you to hotels.");
       navigate("/hotels");
     } catch (error) {
-      toast.error(resolveErrorMessage(error, "OTP verification failed"));
-    }
-  };
-
-  const onResend = async () => {
-    try {
-      const resendRes = await resendOtp(contact);
-      setDevOtp(resendRes?.devOtp || null);
-      if (resendRes?.smsFallback) {
-        toast("SMS fallback active. Use the OTP shown below.", { icon: "⚠️" });
-      }
-      toast.success("New OTP sent");
-    } catch (error) {
-      toast.error(resolveErrorMessage(error, "Unable to resend OTP"));
+      toast.error(resolveErrorMessage(error, "Registration failed"));
     }
   };
 
@@ -117,15 +69,15 @@ export default function RegisterPage() {
         <div className="relative space-y-5">
           <BrandLogo />
           <div className="space-y-3">
-            <h1 className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-display text-3xl font-bold leading-tight text-transparent sm:text-4xl md:text-5xl">Create your verified account</h1>
+            <h1 className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text font-display text-3xl font-bold leading-tight text-transparent sm:text-4xl md:text-5xl">Create your account</h1>
             <p className="text-slate-600 dark:text-slate-300">
-              Join Horizon-Hotels and enjoy seamless hotel bookings with enhanced security and exclusive features.
+              Join Horizon-Hotels and enjoy seamless hotel bookings with a faster signup flow.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-1">
             <div className="rounded-xl bg-gradient-to-br from-purple-400/20 to-pink-400/20 p-3 shadow-sm dark:from-purple-700/25 dark:to-pink-700/25">
               <p className="text-xs uppercase tracking-wide text-slate-600 dark:text-slate-300">Simple Setup</p>
-              <p className="mt-1 font-semibold text-slate-700 dark:text-slate-200">Phone verification only for security</p>
+              <p className="mt-1 font-semibold text-slate-700 dark:text-slate-200">Create your account in one step</p>
             </div>
           </div>
         </div>
@@ -141,7 +93,7 @@ export default function RegisterPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-white/35 via-transparent to-pink-100/25 dark:from-slate-900/30 dark:to-pink-900/15" />
         <div className="relative w-full space-y-3">
         <h2 className="font-display text-3xl font-bold sm:text-4xl">Register</h2>
-        <p className="text-sm text-slate-600 dark:text-slate-300">Fill all required details for a secure account.</p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">Fill all required details to create your account.</p>
         <input
           className="input"
           placeholder="Full name"
@@ -202,15 +154,9 @@ export default function RegisterPage() {
         </div>
         
         <button className="btn-primary glow-ring mt-1 w-full" type="submit">
-          Send OTP & Create Account
+          Create Account
         </button>
-        
-        {isVerified && (
-          <div className="rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-center text-sm font-semibold text-emerald-700 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-            Verified: Phone is confirmed and account is ready
-          </div>
-        )}
-        
+
         <div className="space-y-2 text-center">
           <button
             type="button"
@@ -222,44 +168,6 @@ export default function RegisterPage() {
         </div>
         </div>
       </motion.form>
-
-      {showOtpPanel ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-4 backdrop-blur-sm">
-          <motion.form
-            initial={{ opacity: 0, y: 24, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            onSubmit={onVerify}
-            className="panel-slide w-full max-w-lg rounded-2xl border border-white/30 bg-gradient-to-br from-white to-slate-50 p-6 shadow-2xl dark:border-slate-700/50 dark:from-slate-900 dark:to-slate-800"
-          >
-            <h3 className="font-display text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Verify your phone</h3>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-              Enter the OTP sent to <span className="font-semibold">{contact.phone}</span>
-            </p>
-            {devOtp?.phoneOtp ? (
-              <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:border-amber-900/50 dark:bg-amber-900/20 dark:text-amber-200">
-                SMS fallback OTP: <span className="font-bold tracking-widest">{devOtp.phoneOtp}</span>
-              </p>
-            ) : null}
-
-            <div className="mt-4">
-              <input
-                className="input text-center text-lg font-semibold tracking-widest"
-                placeholder="000000"
-                maxLength="6"
-                value={phoneOtp}
-                onChange={(e) => setPhoneOtp(e.target.value.replace(/\D/g, ""))}
-                required
-              />
-            </div>
-
-            <div className="mt-4 flex flex-wrap gap-2">
-              <button type="submit" className="btn-primary w-full sm:flex-1">Verify & Continue</button>
-              <button type="button" className="btn-secondary w-full sm:w-auto" onClick={onResend}>Resend</button>
-              <button type="button" className="btn-secondary w-full sm:w-auto" onClick={() => setShowOtpPanel(false)}>Close</button>
-            </div>
-          </motion.form>
-        </div>
-      ) : null}
     </div>
   );
 }

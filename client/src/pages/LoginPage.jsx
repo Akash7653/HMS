@@ -51,7 +51,7 @@ export default function LoginPage() {
           >
             <div className="rounded-2xl bg-gradient-to-br from-cyan-400/25 to-blue-500/25 p-4 shadow-sm dark:from-cyan-700/25 dark:to-blue-800/25 border border-cyan-300/30 dark:border-cyan-700/30 backdrop-blur-sm">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">Guest Trust</p>
-              <p className="mt-2 font-semibold text-slate-700 dark:text-slate-200">Verified account controls</p>
+              <p className="mt-2 font-semibold text-slate-700 dark:text-slate-200">Secure account access</p>
             </div>
           </motion.div>
         </div>
@@ -68,7 +68,7 @@ export default function LoginPage() {
         <div className="relative w-full space-y-4">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <h2 className="font-display text-3xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent sm:text-4xl">Login</h2>
-          <p className="text-sm text-slate-600 dark:text-slate-300 mt-2">Use your verified email or phone with password to continue.</p>
+          <p className="text-sm text-slate-600 dark:text-slate-300 mt-2">Use your email or phone with password to continue.</p>
         </motion.div>
         
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }} className="space-y-3">
@@ -99,8 +99,8 @@ export default function LoginPage() {
           Login Securely
         </motion.button>
         
-        <p className="text-sm text-slate-600 dark:text-slate-300 text-center">
-          New user? <Link className="font-semibold text-brand-700 hover:text-brand-800 transition-colors" to="/register">Create verified account</Link>
+          <p className="text-sm text-slate-600 dark:text-slate-300 text-center">
+          New user? <Link className="font-semibold text-brand-700 hover:text-brand-800 transition-colors" to="/register">Create account</Link>
         </p>
         </div>
       </motion.form>

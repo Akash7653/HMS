@@ -13,9 +13,6 @@ const userSchema = new mongoose.Schema(
     avatar: { type: String, default: "" },
     emailVerified: { type: Boolean, default: false },
     phoneVerified: { type: Boolean, default: false },
-    emailOtp: { type: String, select: false, default: "" },
-    phoneOtp: { type: String, select: false, default: "" },
-    otpExpiresAt: { type: Date, select: false },
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Hotel" }],
   },
   { timestamps: true }
