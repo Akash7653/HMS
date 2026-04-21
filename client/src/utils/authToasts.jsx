@@ -10,13 +10,13 @@ function renderToast(t, config) {
 
   return (
     <div
-      className={`pointer-events-auto w-[min(94vw,420px)] rounded-3xl border ${borderClass} ${gradientClass} p-[1px] shadow-2xl transition-all duration-300 ${
+      className={`pointer-events-auto w-[min(92vw,360px)] rounded-2xl border ${borderClass} ${gradientClass} p-[1px] shadow-xl transition-all duration-250 ${
         t.visible ? "translate-y-0 scale-100 opacity-100" : "translate-y-2 scale-95 opacity-0"
       }`}
     >
-      <div className="rounded-3xl bg-white/95 px-5 py-4 text-slate-800 dark:bg-slate-900/95 dark:text-slate-100">
-        <p className="text-base font-extrabold leading-tight">{title}</p>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{subtitle}</p>
+      <div className="rounded-2xl bg-white/95 px-4 py-3 text-slate-800 dark:bg-slate-900/95 dark:text-slate-100">
+        <p className="text-sm font-extrabold leading-tight">{title}</p>
+        <p className="mt-0.5 text-[13px] leading-snug text-slate-600 dark:text-slate-300">{subtitle}</p>
       </div>
     </div>
   );

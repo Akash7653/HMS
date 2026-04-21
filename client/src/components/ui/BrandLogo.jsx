@@ -26,7 +26,7 @@
       </svg>
       {withText ? (
         bubbleText ? (
-          <span className={`rounded-full border border-cyan-200/70 bg-gradient-to-r from-white/90 via-cyan-50/95 to-blue-50/90 px-3 py-1 font-display text-lg font-bold tracking-tight text-cyan-800 text-center shadow-sm dark:border-slate-700/60 dark:from-slate-900/85 dark:via-slate-800/85 dark:to-slate-900/85 dark:text-cyan-300 ${textClassName}`}>
+          <span className={`inline-flex min-w-[112px] items-center justify-center whitespace-nowrap rounded-full border border-cyan-200/70 bg-gradient-to-r from-white/90 via-cyan-50/95 to-blue-50/90 px-3 py-1 font-display text-[15px] font-bold leading-none tracking-tight text-center text-cyan-800 shadow-sm dark:border-slate-700/60 dark:from-slate-900/85 dark:via-slate-800/85 dark:to-slate-900/85 dark:text-cyan-300 sm:min-w-0 sm:text-lg ${textClassName}`}>
             Horizon-Hotels
           </span>
         ) : (

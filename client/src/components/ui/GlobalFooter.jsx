@@ -2,7 +2,7 @@
 
 export default function GlobalFooter() {
   return (
-    <footer className="mt-1 border-t border-slate-200/70 bg-white/40 dark:border-slate-700/60 dark:bg-slate-950/30 md:mt-6">
+    <footer className="mt-2 border-t border-slate-200/70 bg-white/40 pb-[calc(6.75rem+var(--safe-bottom))] dark:border-slate-700/60 dark:bg-slate-950/30 md:mt-6 md:pb-0">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 overflow-x-auto px-3 py-4 md:hidden">
         <div className="shrink-0">
           <BrandLogo textClassName="text-base" />

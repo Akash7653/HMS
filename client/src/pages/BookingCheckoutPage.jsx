@@ -4,12 +4,17 @@ import toast from "react-hot-toast";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
 
-const paymentModes = ["UPI", "Card", "Wallet"];
+function loadRazorpayScript() {
+  return new Promise((resolve) => {
+    if (window.Razorpay) return resolve(true);
 
-function getMethod(mode) {
-  if (mode === "UPI") return "upi";
-  if (mode === "Wallet") return "wallet";
-  return "card";
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
 }
 
 export default function BookingCheckoutPage() {
@@ -21,6 +26,7 @@ export default function BookingCheckoutPage() {
   const [hotel, setHotel] = useState(location.state?.hotel || null);
   const [loading, setLoading] = useState(false);
   const [availability, setAvailability] = useState(null);
+  const [paymentConfig, setPaymentConfig] = useState(null);
   const [form, setForm] = useState({
     name: user?.name || "",
     phone: user?.phone || "",
@@ -30,10 +36,11 @@ export default function BookingCheckoutPage() {
     checkOut: location.state?.booking?.checkOut || "",
     guests: location.state?.booking?.guests || 1,
     coupon: "",
-    paymentMode: "UPI",
   });
 
   useEffect(() => {
+    api.get("/payments/config").then((res) => setPaymentConfig(res.data)).catch(() => setPaymentConfig(null));
+
     if (!user) {
       toast.error("Please login to continue checkout");
       navigate("/login");
@@ -82,29 +89,122 @@ export default function BookingCheckoutPage() {
       return;
     }
 
+    if (!paymentConfig?.razorpay?.enabled || !paymentConfig?.razorpay?.keyId) {
+      toast.error("Razorpay is not configured yet");
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await api.post("/bookings", {
-        hotelId: id,
-        roomType: form.roomType,
-        checkIn: form.checkIn,
-        checkOut: form.checkOut,
-        guests: Number(form.guests),
-        paymentMethod: getMethod(form.paymentMode),
-      });
+      const loaded = await loadRazorpayScript();
+      if (!loaded) {
+        toast.error("Unable to load Razorpay checkout");
+        setLoading(false);
+        return;
+      }
 
-      toast.success("Booking confirmed successfully");
-      navigate(`/confirmation/${res.data.booking._id}`, {
-        state: {
-          booking: res.data.booking,
-          hotel,
-          pricing: price,
-          guest: { name: form.name, phone: form.phone, email: form.email },
+      const orderRes = await api.post("/payments/create-order", {
+        amount: price.total,
+        hotelId: id,
+        notes: {
+          hotelName: hotel.name,
+          roomType: form.roomType,
+          guestName: form.name,
         },
       });
+
+      const checkout = new window.Razorpay({
+        key: paymentConfig.razorpay.keyId,
+        amount: orderRes.data.amount,
+        currency: orderRes.data.currency,
+        name: "Horizon-Hotels",
+        description: `${hotel.name} booking`,
+        order_id: orderRes.data.orderId,
+        prefill: {
+          name: form.name,
+          email: form.email,
+          contact: form.phone,
+        },
+        theme: { color: "#2563eb" },
+        handler: async (response) => {
+          try {
+            const verifyRes = await api.post("/payments/verify", {
+              orderId: orderRes.data.orderId,
+              paymentId: response.razorpay_payment_id,
+              signature: response.razorpay_signature,
+              hotelId: id,
+              roomType: form.roomType,
+              checkIn: form.checkIn,
+              checkOut: form.checkOut,
+              guests: Number(form.guests),
+              amount: price.total,
+            });
+
+            toast.success("Booking confirmed successfully");
+            navigate(`/confirmation/${verifyRes.data.booking.id}`, {
+              state: {
+                booking: verifyRes.data.booking,
+                hotel,
+                pricing: price,
+                guest: { name: form.name, phone: form.phone, email: form.email },
+              },
+            });
+          } catch (error) {
+            toast.error(error.response?.data?.message || "Payment verification failed");
+          } finally {
+            setLoading(false);
+          }
+        },
+        modal: {
+          ondismiss: async () => {
+            try {
+              await api.post("/payments/fail", {
+                orderId: orderRes.data.orderId,
+                hotelId: id,
+                amount: price.total,
+                reason: "user_cancelled",
+                description: "Checkout closed by user before completing payment",
+                source: "checkout_modal",
+                step: "ondismiss",
+              });
+            } catch {
+              // Non-blocking cancellation logging.
+            }
+            toast.error("Payment cancelled. Saved in payment history.");
+            setLoading(false);
+          },
+          escape: true,
+          backdropclose: false,
+        },
+      });
+
+      checkout.on("payment.failed", async (response) => {
+        const gatewayError = response?.error || {};
+
+        try {
+          await api.post("/payments/fail", {
+            orderId: gatewayError.metadata?.order_id || orderRes.data.orderId,
+            paymentId: gatewayError.metadata?.payment_id || "",
+            hotelId: id,
+            amount: price.total,
+            reason: gatewayError.reason || "payment_failed",
+            code: gatewayError.code || "",
+            description: gatewayError.description || "",
+            source: gatewayError.source || "",
+            step: gatewayError.step || "",
+            metadata: gatewayError.metadata || {},
+          });
+        } catch {
+          // Non-blocking failure logging.
+        }
+
+        toast.error("Payment failed. Saved in payment history.");
+        setLoading(false);
+      });
+
+      checkout.open();
     } catch (error) {
       toast.error(error.response?.data?.message || "Unable to complete booking");
-    } finally {
       setLoading(false);
     }
   };
@@ -113,6 +213,11 @@ export default function BookingCheckoutPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-3 px-3 py-4 pb-28 md:space-y-4 md:px-4 md:py-8">
+      <button type="button" onClick={() => navigate(-1)} className="btn-secondary inline-flex items-center gap-2">
+        <span aria-hidden="true">←</span>
+        Back
+      </button>
+
       <div className="card space-y-1.5">
         <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-700">Checkout</p>
         <h1 className="font-display text-[22px] font-bold leading-tight sm:text-2xl">Complete Your Booking</h1>
@@ -120,6 +225,7 @@ export default function BookingCheckoutPage() {
         <div className="flex flex-wrap gap-2 pt-1 text-xs">
           <span className="rounded-full bg-blue-100 px-2.5 py-1 font-semibold text-blue-700 dark:bg-blue-900/35 dark:text-blue-300">{hotel.location?.city}, {hotel.location?.country}</span>
           <span className="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">Room: {form.roomType}</span>
+          <span className="rounded-full bg-cyan-100 px-2.5 py-1 font-semibold text-cyan-700 dark:bg-cyan-900/35 dark:text-cyan-300">Guests: {form.guests}</span>
         </div>
       </div>
 
@@ -148,7 +254,10 @@ export default function BookingCheckoutPage() {
               <input className="input" type="date" value={form.checkOut} onChange={(e) => setForm((p) => ({ ...p, checkOut: e.target.value }))} required />
             </label>
           </div>
-          <input className="input" type="number" min="1" max="10" value={form.guests} onChange={(e) => setForm((p) => ({ ...p, guests: e.target.value }))} />
+          <label className="space-y-1 text-[11px] font-semibold text-slate-600 dark:text-slate-300 sm:text-sm">
+            No. of Guests
+            <input className="input" type="number" min="1" max="10" value={form.guests} onChange={(e) => setForm((p) => ({ ...p, guests: e.target.value }))} />
+          </label>
           {availability ? (
             <p className="rounded-xl bg-emerald-50 px-3 py-2 text-[12px] text-emerald-700 dark:bg-emerald-900/25 dark:text-emerald-300 sm:text-sm">
               {availability.availableRooms} rooms available for selected dates.
@@ -167,25 +276,8 @@ export default function BookingCheckoutPage() {
           </div>
         </section>
 
-        <section className="card space-y-2.5">
-          <h2 className="text-base font-bold sm:text-lg">Payment Option</h2>
-          <div className="grid grid-cols-3 gap-2">
-            {paymentModes.map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                className={`rounded-xl border px-3 py-2 text-[12px] font-semibold sm:text-sm ${form.paymentMode === mode ? "border-blue-500 bg-blue-50 text-blue-700 shadow-sm" : "border-slate-300 text-slate-600 dark:border-slate-700 dark:text-slate-300"}`}
-                onClick={() => setForm((p) => ({ ...p, paymentMode: mode }))}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400">Selected mode: <span className="font-semibold text-slate-700 dark:text-slate-200">{form.paymentMode}</span></p>
-        </section>
-
         <button type="submit" disabled={loading} className="btn-primary w-full bg-gradient-to-r from-orange-500 to-emerald-500 py-2.5 text-sm font-bold disabled:opacity-60 sm:py-3 sm:text-base">
-          {loading ? "Confirming..." : "Confirm Booking"}
+          {loading ? "Opening Razorpay..." : "Confirm Booking"}
         </button>
       </form>
     </div>

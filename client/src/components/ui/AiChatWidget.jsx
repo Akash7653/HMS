@@ -110,7 +110,7 @@ export default function AiChatWidget() {
     const lower = normalize(text);
 
     if (lower.includes("payment") || lower.includes("razorpay")) {
-      return "To pay securely: open a hotel, choose dates, and click Open Payment Window. Razorpay checkout popup will appear before confirmation.";
+      return "To pay securely: open a hotel, choose dates, and continue to checkout. Confirm Booking will open the Razorpay popup before confirmation.";
     }
 
     if (lower.includes("cancel")) {
@@ -142,7 +142,7 @@ export default function AiChatWidget() {
     }
 
     if (lower.includes("book") || lower.includes("booking")) {
-      return "Booking steps: choose hotel > pick room/date > review availability > Open Payment Window > complete Razorpay checkout.";
+      return "Booking steps: choose hotel > pick room/date > review availability > continue to checkout > complete Razorpay checkout.";
     }
 
     return "I can help with hotel recommendations by city, booking flow, payments, and cancellations. Try: Suggest hotels in Goa.";

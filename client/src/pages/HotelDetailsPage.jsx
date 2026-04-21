@@ -380,15 +380,14 @@ export default function HotelDetailsPage() {
               <input className="input" type="date" value={booking.checkOut} onChange={(e) => setBooking((p) => ({ ...p, checkOut: e.target.value }))} />
             </label>
           </div>
-          <input className="input" type="number" min="1" max="10" value={booking.guests} onChange={(e) => setBooking((p) => ({ ...p, guests: Number(e.target.value) }))} />
+          <label className="space-y-1 text-xs font-semibold text-slate-600 dark:text-slate-300">
+            No. of Guests
+            <input className="input" type="number" min="1" max="10" value={booking.guests} onChange={(e) => setBooking((p) => ({ ...p, guests: Number(e.target.value) }))} />
+          </label>
           <div className="rounded-2xl border border-cyan-200/60 bg-gradient-to-r from-cyan-50 to-blue-50 px-4 py-3 text-sm text-slate-700 shadow-sm dark:border-cyan-900/50 dark:from-slate-900 dark:to-slate-800 dark:text-slate-200">
             <p className="font-semibold text-cyan-700 dark:text-cyan-300">Secure Checkout</p>
-            <p className="mt-1">Razorpay opens in a popup before the booking is confirmed.</p>
+            <p className="mt-1">Continue to checkout to confirm your booking securely.</p>
           </div>
-
-          {paymentConfig?.razorpay?.enabled ? (
-            <p className="text-xs text-slate-500 dark:text-slate-400">Razorpay key loaded: {paymentConfig.razorpay.keyId}</p>
-          ) : null}
 
           {availability ? (
             <div className="rounded-xl bg-brand-50 p-3 text-sm dark:bg-brand-900/20">
@@ -397,15 +396,12 @@ export default function HotelDetailsPage() {
               Total: <b>Rs. {availability.totalPrice}</b>
             </div>
           ) : null}
-          <button type="button" className="btn-primary bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 shadow-lg" onClick={() => setShowBookingModal(true)}>
-            Open Payment Window
-          </button>
           <button
             type="button"
             className="btn-primary bg-gradient-to-r from-orange-500 to-amber-500"
             onClick={() => navigate(`/checkout/${id}`, { state: { hotel, booking } })}
           >
-            Continue to Full Checkout
+            Continue to Checkout
           </button>
         </div>
 
