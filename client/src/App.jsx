@@ -30,7 +30,7 @@ export default function App() {
   const rafRef = useRef(null);
 
   const hideBottomNav = useMemo(
-    () => location.pathname.startsWith("/admin") || location.pathname.startsWith("/login") || location.pathname.startsWith("/register"),
+    () => location.pathname.startsWith("/admin"),
     [location.pathname]
   );
 

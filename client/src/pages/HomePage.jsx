@@ -191,9 +191,16 @@ export default function HomePage() {
         <div className="space-y-3">
           {recommendedHotels.map((hotel) => {
             const minPrice = Math.min(...hotel.roomTypes.map((room) => room.basePrice));
+            const fallbackImage = "https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=600&q=75";
             return (
               <article key={hotel._id} className="card overflow-hidden border-white/50 bg-white/85 p-0 dark:border-slate-700 dark:bg-slate-900/70">
-                <img src={hotel.images?.[0]} alt={hotel.name} className="h-36 w-full object-cover" loading="lazy" />
+                <img 
+                  src={hotel.images?.[0] || fallbackImage} 
+                  alt={hotel.name} 
+                  className="h-36 w-full object-cover" 
+                  loading="lazy"
+                  onError={(e) => { e.target.src = fallbackImage; }}
+                />
                 <div className="space-y-1.5 p-3">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-display text-[15px] font-bold sm:text-base">{hotel.name}</h3>
