@@ -50,8 +50,7 @@ const conversionSchema = new mongoose.Schema({
 const analyticsSchema = new mongoose.Schema({
   date: { 
     type: Date, 
-    required: true,
-    index: true
+    required: true
   },
   pageViews: [pageViewSchema],
   events: [eventSchema],
