@@ -170,7 +170,7 @@ export default function App() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.24, ease: "easeOut" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
           >
             <Suspense fallback={<div className="mx-auto max-w-6xl px-4 py-10 text-sm text-slate-500">Loading page...</div>}>
             <Routes location={location}>
