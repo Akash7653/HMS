@@ -75,12 +75,27 @@ function HotelCard({ hotel }) {
   const now = new Date();
   const day = now.getDay();
   const month = now.getMonth() + 1;
-  const pricingBadge = month === 10 || month === 11 ? "Festival pricing" : day === 0 || day === 6 ? "Weekend surge" : "Weekday deal";
-  const pricingBadgeClass = month === 10 || month === 11
-    ? "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
-    : day === 0 || day === 6
-      ? "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300"
-      : "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300";
+  const isPeakMonth = [4, 5, 10, 11, 12].includes(month);
+  const isWeekend = day === 0 || day === 6;
+  const hasStrongDemand = (hotel.ratingAverage || 0) >= 4.4 && (hotel.ratingCount || 0) >= 60;
+  const isValuePick = minPrice <= 3800 && (hotel.ratingAverage || 0) >= 4;
+
+  let pricingBadge = "Stable pricing";
+  let pricingBadgeClass = "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+
+  if (isPeakMonth && hasStrongDemand) {
+    pricingBadge = "Likely to rise";
+    pricingBadgeClass = "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300";
+  } else if (isWeekend && hasStrongDemand) {
+    pricingBadge = "High weekend demand";
+    pricingBadgeClass = "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300";
+  } else if (isValuePick) {
+    pricingBadge = "Best value now";
+    pricingBadgeClass = "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300";
+  } else if (isPeakMonth) {
+    pricingBadge = "Seasonal pricing";
+    pricingBadgeClass = "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300";
+  }
 
   return (
     <article className="card group hover-lift overflow-hidden" style={{ contentVisibility: "auto", containIntrinsicSize: "320px" }}>

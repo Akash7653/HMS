@@ -1,5 +1,6 @@
 const Review = require("../models/Review");
 const Hotel = require("../models/Hotel");
+const { invalidateHotelsCache } = require("../services/cacheService");
 
 async function refreshHotelRating(hotelId) {
   const stats = await Review.aggregate([
@@ -35,6 +36,7 @@ exports.addReview = async (req, res, next) => {
     );
 
     await refreshHotelRating(hotel._id);
+    await invalidateHotelsCache();
 
     res.status(201).json({ review });
   } catch (error) {

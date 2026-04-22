@@ -9,10 +9,11 @@ const {
 const { protect } = require("../middleware/auth");
 const validate = require("../middleware/validate");
 const { createBookingValidator } = require("../validators/bookingValidators");
+const { cacheAvailability } = require("../middleware/cacheMiddleware");
 
 const router = express.Router();
 
-router.get("/availability", checkAvailability);
+router.get("/availability", cacheAvailability(60), checkAvailability);
 router.get("/availability/stream", streamAvailability);
 
 router.post("/", protect, createBookingValidator, validate, createBooking);

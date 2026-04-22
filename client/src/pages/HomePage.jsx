@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import api from "../api";
+import { useAuth } from "../context/AuthContext";
 
 const offers = [
   { title: "Summer Escape", subtitle: "Up to 35% off on beach stays", code: "BEACH35", color: "from-orange-500 to-rose-500" },
@@ -38,6 +39,7 @@ function nightsBetween(checkIn, checkOut) {
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [tripScope, setTripScope] = useState("India");
   const [search, setSearch] = useState({
     destination: "",
@@ -47,20 +49,55 @@ export default function HomePage() {
   });
   const [recommendedHotels, setRecommendedHotels] = useState([]);
   const [hotelCount, setHotelCount] = useState(120);
+  const [destinationSuggestions, setDestinationSuggestions] = useState({
+    trendingCities: [],
+    cities: [],
+    states: [],
+    hotels: [],
+  });
+  const [showDestinationSuggestions, setShowDestinationSuggestions] = useState(false);
 
   useEffect(() => {
-    api.get("/hotels", { params: { page: 1, limit: 6, sortBy: "ratingAverage", order: "desc" } })
+    const fallback = () =>
+      api.get("/hotels", { params: { page: 1, limit: 6, sortBy: "ratingAverage", order: "desc" } });
+
+    const request = user
+      ? api.get("/hotels/recommended/for-me").catch(() => fallback())
+      : fallback();
+
+    request
       .then((res) => {
         const hotels = res.data?.data || [];
         const total = res.data?.pagination?.total || hotels.length;
-        setRecommendedHotels(hotels);
+        setRecommendedHotels(hotels.slice(0, 6));
         setHotelCount(total > 0 ? total : 120);
       })
       .catch(() => {
         setRecommendedHotels([]);
         setHotelCount(120);
       });
-  }, []);
+  }, [user]);
+
+  useEffect(() => {
+    const q = search.destination.trim();
+    if (!q) {
+      setDestinationSuggestions({ trendingCities: [], cities: [], states: [], hotels: [] });
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      api
+        .get("/hotels/suggestions", { params: { q } })
+        .then((res) => {
+          setDestinationSuggestions(res.data?.suggestions || { trendingCities: [], cities: [], states: [], hotels: [] });
+        })
+        .catch(() => {
+          setDestinationSuggestions({ trendingCities: [], cities: [], states: [], hotels: [] });
+        });
+    }, 260);
+
+    return () => clearTimeout(timer);
+  }, [search.destination]);
 
   const searchNights = useMemo(() => nightsBetween(search.checkIn, search.checkOut), [search.checkIn, search.checkOut]);
 
@@ -111,15 +148,63 @@ export default function HomePage() {
         </div>
 
         <form onSubmit={onSearch} className="space-y-1.5 lg:space-y-3">
-          <label className="input flex items-center gap-2 py-2.5">
-            <span className="text-sm text-slate-400">📍</span>
-            <input
-              className="w-full bg-transparent text-[13px] text-slate-700 outline-none dark:text-slate-200"
-              placeholder="Area, landmark, or hotel"
-              value={search.destination}
-              onChange={(e) => setSearch((p) => ({ ...p, destination: e.target.value }))}
-            />
-          </label>
+          <div className="relative">
+            <label className="input flex items-center gap-2 py-2.5">
+              <span className="text-sm text-slate-400">📍</span>
+              <input
+                className="w-full bg-transparent text-[13px] text-slate-700 outline-none dark:text-slate-200"
+                placeholder="Area, landmark, or hotel"
+                value={search.destination}
+                onFocus={() => setShowDestinationSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowDestinationSuggestions(false), 140)}
+                onChange={(e) => setSearch((p) => ({ ...p, destination: e.target.value }))}
+              />
+            </label>
+
+            {showDestinationSuggestions && (destinationSuggestions.cities.length || destinationSuggestions.states.length || destinationSuggestions.hotels.length || destinationSuggestions.trendingCities.length) ? (
+              <div className="absolute z-20 mt-1 w-full rounded-xl border border-slate-200 bg-white/95 p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900/95">
+                {destinationSuggestions.trendingCities.length ? (
+                  <div className="mb-2">
+                    <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-500">Trending</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {destinationSuggestions.trendingCities.slice(0, 4).map((city) => (
+                        <button
+                          key={`trend-${city}`}
+                          type="button"
+                          className="rounded-full bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                          onMouseDown={() => setSearch((p) => ({ ...p, destination: city }))}
+                        >
+                          {city}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+
+                {destinationSuggestions.cities.slice(0, 5).map((city) => (
+                  <button
+                    key={`city-${city}`}
+                    type="button"
+                    className="block w-full rounded-lg px-2 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
+                    onMouseDown={() => setSearch((p) => ({ ...p, destination: city }))}
+                  >
+                    {city}
+                  </button>
+                ))}
+
+                {destinationSuggestions.hotels.slice(0, 3).map((hotel) => (
+                  <button
+                    key={hotel._id || hotel.name}
+                    type="button"
+                    className="block w-full rounded-lg px-2 py-1.5 text-left text-xs text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                    onMouseDown={() => setSearch((p) => ({ ...p, destination: hotel.location?.city || hotel.name }))}
+                  >
+                    {hotel.name} • {hotel.location?.city}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">
               Start Date

@@ -1,5 +1,5 @@
 ﻿import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
 import api from "../api";
@@ -59,6 +59,7 @@ export default function HotelDetailsPage() {
   const [paymentConfig, setPaymentConfig] = useState(null);
   const [booking, setBooking] = useState({ roomType: "Single", checkIn: "", checkOut: "", guests: 1, paymentMethod: "razorpay" });
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
+  const [similarHotels, setSimilarHotels] = useState([]);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
@@ -72,6 +73,10 @@ export default function HotelDetailsPage() {
       setHotel(res.data.hotel);
       setReviews(res.data.reviews);
     });
+
+    api.get(`/hotels/similar/${id}`)
+      .then((res) => setSimilarHotels(res.data?.data || []))
+      .catch(() => setSimilarHotels([]));
 
     api.get("/payments/config").then((res) => setPaymentConfig(res.data));
   }, [id]);
@@ -353,6 +358,36 @@ export default function HotelDetailsPage() {
 
       {hotel.location?.coordinates ? (
         <HotelMap hotels={[hotel]} title={`${hotel.name} location`} />
+      ) : null}
+
+      {similarHotels.length ? (
+        <section className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-lg font-semibold sm:text-2xl">Similar Hotels In {hotel.location?.state}</h2>
+            <Link to="/hotels" className="text-xs font-semibold text-blue-600 sm:text-sm">Explore more</Link>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {similarHotels.slice(0, 4).map((item) => {
+              const minPrice = Math.min(...item.roomTypes.map((room) => room.basePrice));
+              const image = item.images?.[0] || "https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=600&q=75";
+              return (
+                <article key={item._id} className="card overflow-hidden p-0">
+                  <img src={image} alt={item.name} className="h-36 w-full object-cover" loading="lazy" />
+                  <div className="space-y-1.5 p-3">
+                    <h3 className="line-clamp-1 font-display text-sm font-semibold sm:text-base">{item.name}</h3>
+                    <p className="text-xs text-slate-600 dark:text-slate-300">{item.location?.city}, {item.location?.state}</p>
+                    <div className="flex items-center justify-between pt-1">
+                      <p className="text-sm font-bold text-brand-700 dark:text-brand-300">Rs. {minPrice}</p>
+                      <Link to={`/hotels/${item._id}`} className="rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 px-3 py-1 text-[11px] font-bold text-white">
+                        View
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
       ) : null}
 
       <section className="grid gap-3 lg:grid-cols-2">

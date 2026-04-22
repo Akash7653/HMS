@@ -14,6 +14,10 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 const aiRoutes = require("./routes/aiRoutes");
+const recommendationRoutes = require("./routes/recommendations");
+const mapRoutes = require("./routes/mapRoutes");
+const businessRoutes = require("./routes/businessRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
 
 const { errorHandler, notFound } = require("./middleware/errorHandler");
 const { authLimiter, searchLimiter, paymentsLimiter } = require("./middleware/rateLimiter");
@@ -58,6 +62,10 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/payments", paymentsLimiter, paymentRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/recommendations", recommendationRoutes);
+app.use("/api/map", mapRoutes);
+app.use("/api/business", businessRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

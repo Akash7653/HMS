@@ -1,0 +1,225 @@
+name: Deploy Horizon Hotels
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  NODE_VERSION: '18'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # Test Job
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:7.0
+        env:
+          MONGO_INITDB_ROOT_USERNAME: test
+          MONGO_INITDB_ROOT_PASSWORD: test
+        ports:
+          - 27017:27017
+      
+      redis:
+        image: redis:7.2-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+
+    - name: Install dependencies (server)
+      working-directory: ./server
+      run: npm ci
+
+    - name: Install dependencies (client)
+      working-directory: ./client
+      run: npm ci
+
+    - name: Run server tests
+      working-directory: ./server
+      run: npm test
+      env:
+        MONGO_URI: mongodb://test:test@localhost:27017/test?retryWrites=true&w=majority
+        REDIS_URL: redis://localhost:6379
+        JWT_SECRET: test_secret
+        NODE_ENV: test
+
+    - name: Run client tests
+      working-directory: ./client
+      run: npm test -- --coverage --watchAll=false
+
+    - name: Build client
+      working-directory: ./client
+      run: npm run build
+
+  # Security Scan
+  security:
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run security audit (server)
+      working-directory: ./server
+      run: npm audit --audit-level high
+
+    - name: Run security audit (client)
+      working-directory: ./client
+      run: npm audit --audit-level high
+
+  # Build and Push Docker Images
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    if: github.ref == 'refs/heads/main'
+    
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      backend-image: ${{ steps.backend-meta.outputs.tags }}
+      frontend-image: ${{ steps.frontend-meta.outputs.tags }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata for backend
+      id: backend-meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push backend image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./server
+        file: ./server/Dockerfile.prod
+        push: true
+        tags: ${{ steps.backend-meta.outputs.tags }}
+        labels: ${{ steps.backend-meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Extract metadata for frontend
+      id: frontend-meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push frontend image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./client
+        file: ./client/Dockerfile.prod
+        push: true
+        tags: ${{ steps.frontend-meta.outputs.tags }}
+        labels: ${{ steps.frontend-meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  # Deploy to Production
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          cd /opt/horizon-hotels
+          
+          # Pull latest images
+          docker pull ${{ needs.build-and-push.outputs.backend-image }}
+          docker pull ${{ needs.build-and-push.outputs.frontend-image }}
+          
+          # Stop existing containers
+          docker-compose -f docker-compose.production.yml down
+          
+          # Start new containers
+          docker-compose -f docker-compose.production.yml up -d
+          
+          # Wait for health checks
+          sleep 30
+          
+          # Verify deployment
+          docker-compose -f docker-compose.production.yml ps
+          
+          # Clean up old images
+          docker image prune -f
+
+    - name: Run health checks
+      run: |
+        # Wait for deployment to be ready
+        sleep 60
+        
+        # Check backend health
+        curl -f ${{ secrets.BACKEND_URL }}/api/health || exit 1
+        
+        # Check frontend is accessible
+        curl -f ${{ secrets.FRONTEND_URL }}/ || exit 1
+        
+        echo "Deployment health checks passed!"
+
+    - name: Notify team
+      uses: 8398a7/action-slack@v3
+      if: always()
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        text: |
+          Horizon Hotels deployment ${{ job.status }}!
+          Commit: ${{ github.sha }}
+          Branch: ${{ github.ref_name }}
+          Deployed to: ${{ secrets.FRONTEND_URL }}

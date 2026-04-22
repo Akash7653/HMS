@@ -1,6 +1,6 @@
 ﻿const User = require("../models/User");
-const crypto = require("crypto");
-const { signToken, signRefreshToken, verifyRefreshToken } = require("../utils/jwt");
+const AuthService = require("../services/authService");
+const OAuthService = require("../services/oauthService");
 const { sendEmailSimulation } = require("../services/emailService");
 
 function toUserPayload(user) {
@@ -187,6 +187,152 @@ exports.updateProfile = async (req, res, next) => {
     res.json({
       message: "Profile updated",
       user: toUserPayload(user),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// OAuth endpoints
+exports.getGoogleAuthURL = async (req, res, next) => {
+  try {
+    const authURL = await OAuthService.getGoogleAuthURL();
+    res.json({
+      success: true,
+      authURL
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getFacebookAuthURL = async (req, res, next) => {
+  try {
+    const authURL = await OAuthService.getFacebookAuthURL();
+    res.json({
+      success: true,
+      authURL
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.handleGoogleCallback = async (req, res, next) => {
+  try {
+    const { code, state } = req.body;
+    const deviceInfo = AuthService.extractDeviceInfo(req);
+    
+    const result = await OAuthService.handleGoogleCallback(code, state, deviceInfo);
+    
+    res.json({
+      success: true,
+      message: "OAuth authentication successful",
+      ...result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.handleFacebookCallback = async (req, res, next) => {
+  try {
+    const { code, state } = req.body;
+    const deviceInfo = AuthService.extractDeviceInfo(req);
+    
+    const result = await OAuthService.handleFacebookCallback(code, state, deviceInfo);
+    
+    res.json({
+      success: true,
+      message: "OAuth authentication successful",
+      ...result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Enhanced token management
+exports.refreshToken = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+    
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Refresh token is required"
+      });
+    }
+
+    const result = await AuthService.refreshAccessToken(refreshToken);
+    
+    res.json({
+      success: true,
+      message: "Token refreshed successfully",
+      ...result
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Session management
+exports.getActiveSessions = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const sessions = await AuthService.getActiveSessions(userId);
+    
+    res.json({
+      success: true,
+      data: sessions
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.revokeSession = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { sessionId } = req.params;
+    
+    await AuthService.revokeSession(userId, sessionId);
+    
+    res.json({
+      success: true,
+      message: "Session revoked successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.revokeAllSessions = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    
+    await AuthService.revokeAllUserTokens(userId);
+    
+    res.json({
+      success: true,
+      message: "All sessions revoked successfully"
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Enhanced logout
+exports.logout = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+    const accessToken = req.headers.authorization?.replace('Bearer ', '');
+    
+    await AuthService.logout(accessToken, refreshToken);
+    
+    res.json({
+      success: true,
+      message: "Logged out successfully"
     });
   } catch (error) {
     next(error);

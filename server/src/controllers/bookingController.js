@@ -5,6 +5,7 @@ const Payment = require("../models/Payment");
 const { calculateDynamicPrice } = require("../services/pricingService");
 const { sendEmail } = require("../services/emailService");
 const { sendSms } = require("../services/smsService");
+const { invalidateHotelsCache } = require("../services/cacheService");
 const {
   getBookedCount,
   publishAvailabilityEvent,
@@ -167,6 +168,8 @@ exports.createBooking = async (req, res, next) => {
       checkOut,
     });
 
+    await invalidateHotelsCache();
+
     res.status(201).json({ booking, paymentCaptured });
   } catch (error) {
     next(error);
@@ -226,6 +229,8 @@ exports.cancelBooking = async (req, res, next) => {
       checkIn: booking.checkIn,
       checkOut: booking.checkOut,
     });
+
+    await invalidateHotelsCache();
 
     const deletedBooking = await Booking.findByIdAndDelete(booking._id);
 

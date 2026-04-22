@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
 import api from "../api";
@@ -14,7 +14,6 @@ const defaultFilters = {
   maxPrice: "",
   rating: "",
   sortBy: "popularity",
-  page: 1,
   limit: 8,
 };
 
@@ -32,11 +31,20 @@ export default function HotelsPage() {
   const [hotels, setHotels] = useState([]);
   const [mapHotels, setMapHotels] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [mapLoading, setMapLoading] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [mapDrivenSearch, setMapDrivenSearch] = useState(false);
   const [viewportHotelIds, setViewportHotelIds] = useState([]);
   const [viewportInfo, setViewportInfo] = useState({ visibleCount: 0, markerCount: 0, zoom: 4 });
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState({
+    trendingCities: [],
+    cities: [],
+    states: [],
+    hotels: [],
+  });
   const [savedAlerts, setSavedAlerts] = useState(() => {
     try {
       const raw = localStorage.getItem(savedAlertsKey);
@@ -46,13 +54,17 @@ export default function HotelsPage() {
     }
   });
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
+  const loadMoreRef = useRef(null);
 
-  const fetchHotels = useCallback(async (mode = "page") => {
+  const fetchHotels = useCallback(async (mode = "page", options = {}) => {
+    const { targetPage = 1, append = false } = options;
+
     if (mode === "map") {
       setMapLoading(true);
-    } else {
+    } else if (!append) {
       setLoading(true);
     }
+
     try {
       const query = {
         city: filters.city,
@@ -60,53 +72,110 @@ export default function HotelsPage() {
         minPrice: filters.minPrice,
         maxPrice: filters.maxPrice,
         rating: filters.rating,
-        page: mode === "map" ? 1 : filters.page,
+        page: mode === "map" ? 1 : targetPage,
         limit: mode === "map" ? 1008 : filters.limit,
         sortBy: "createdAt",
         order: "desc",
       };
 
       const res = await api.get("/hotels", { params: query });
+      const serverHotels = res.data.data || [];
+
       if (mode === "map") {
-        setMapHotels(res.data.data || []);
+        setMapHotels(serverHotels);
       } else {
-        setHotels(res.data.data || []);
-        setPagination(res.data.pagination || { page: 1, pages: 1, total: 0 });
+        setHotels((prev) => {
+          if (!append) return serverHotels;
+          const merged = [...prev, ...serverHotels];
+          const unique = new Map(merged.map((hotel) => [hotel._id, hotel]));
+          return Array.from(unique.values());
+        });
+        setPagination(res.data.pagination || { page: targetPage, pages: 1, total: 0 });
       }
     } catch {
       if (mode === "map") {
         setMapHotels([]);
       } else {
-        setHotels([]);
+        if (!append) {
+          setHotels([]);
+        }
         setPagination({ page: 1, pages: 1, total: 0 });
       }
     } finally {
       if (mode === "map") {
         setMapLoading(false);
-      } else {
+      } else if (!append) {
         setLoading(false);
       }
     }
-  }, [filters.city, filters.state, filters.minPrice, filters.maxPrice, filters.rating, filters.page, filters.limit]);
+  }, [filters.city, filters.state, filters.minPrice, filters.maxPrice, filters.rating, filters.limit]);
 
   useEffect(() => {
     const city = params.get("city") || "";
-    setFilters((prev) => ({ ...prev, city, page: 1 }));
+    setFilters((prev) => ({ ...prev, city }));
   }, [params]);
 
   useEffect(() => {
-    fetchHotels();
+    fetchHotels("page", { targetPage: 1, append: false });
   }, [fetchHotels]);
 
   useEffect(() => {
     if (!showMap) return;
-    setMapLoading(true);
     fetchHotels("map");
   }, [showMap, fetchHotels]);
 
   useEffect(() => {
     localStorage.setItem(savedAlertsKey, JSON.stringify(savedAlerts.slice(0, 10)));
   }, [savedAlerts]);
+
+  useEffect(() => {
+    const cityText = filters.city.trim();
+    if (!cityText) {
+      setSuggestions({ trendingCities: [], cities: [], states: [], hotels: [] });
+      return;
+    }
+
+    const handle = setTimeout(async () => {
+      setSuggestionsLoading(true);
+      try {
+        const res = await api.get("/hotels/suggestions", { params: { q: cityText } });
+        setSuggestions(res.data?.suggestions || { trendingCities: [], cities: [], states: [], hotels: [] });
+      } catch {
+        setSuggestions({ trendingCities: [], cities: [], states: [], hotels: [] });
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    }, 260);
+
+    return () => clearTimeout(handle);
+  }, [filters.city]);
+
+  const canAutoLoad =
+    !showMap &&
+    !mapDrivenSearch &&
+    !loading &&
+    !isLoadingMore &&
+    pagination.page < pagination.pages;
+
+  useEffect(() => {
+    if (!canAutoLoad || !loadMoreRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (!entry?.isIntersecting) return;
+
+        setIsLoadingMore(true);
+        fetchHotels("page", { targetPage: pagination.page + 1, append: true }).finally(() => {
+          setIsLoadingMore(false);
+        });
+      },
+      { rootMargin: "200px" }
+    );
+
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [canAutoLoad, fetchHotels, pagination.page]);
 
   const applyLocalFilters = (list) => {
     let result = [...list];
@@ -148,7 +217,10 @@ export default function HotelsPage() {
 
   const onSearch = (e) => {
     e.preventDefault();
-    setFilters((p) => ({ ...p, page: 1 }));
+    fetchHotels("page", { targetPage: 1, append: false });
+    if (showMap) {
+      fetchHotels("map");
+    }
   };
 
   const toggleAmenity = (name) => {
@@ -190,11 +262,27 @@ export default function HotelsPage() {
   };
 
   const applySavedAlert = (alert) => {
-    setFilters((prev) => ({ ...prev, ...alert.filters, page: 1 }));
+    setFilters((prev) => ({ ...prev, ...alert.filters }));
   };
 
   const deleteSavedAlert = (id) => {
     setSavedAlerts((prev) => prev.filter((alert) => alert.id !== id));
+  };
+
+  const hasSuggestions =
+    suggestions.trendingCities.length ||
+    suggestions.cities.length ||
+    suggestions.states.length ||
+    suggestions.hotels.length;
+
+  const applySuggestion = (value, type) => {
+    setShowSuggestions(false);
+    setFilters((prev) => {
+      if (type === "state") {
+        return { ...prev, state: value };
+      }
+      return { ...prev, city: value };
+    });
   };
 
   return (
@@ -225,15 +313,65 @@ export default function HotelsPage() {
         </div>
 
         <form onSubmit={onSearch} className="space-y-1.5 lg:space-y-2">
-          <label className="input flex items-center gap-2 py-2.5">
-            <span className="text-sm text-slate-400">🔎</span>
-            <input
-              className="w-full bg-transparent text-[13px] text-slate-700 outline-none dark:text-slate-200"
-              placeholder="Area, landmark, or hotel"
-              value={filters.city}
-              onChange={(e) => setFilters((p) => ({ ...p, city: e.target.value }))}
-            />
-          </label>
+          <div className="relative">
+            <label className="input flex items-center gap-2 py-2.5">
+              <span className="text-sm text-slate-400">🔎</span>
+              <input
+                className="w-full bg-transparent text-[13px] text-slate-700 outline-none dark:text-slate-200"
+                placeholder="Area, landmark, or hotel"
+                value={filters.city}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 140)}
+                onChange={(e) => setFilters((p) => ({ ...p, city: e.target.value }))}
+              />
+            </label>
+
+            {showSuggestions && (suggestionsLoading || hasSuggestions) ? (
+              <div className="absolute z-20 mt-1 w-full rounded-xl border border-slate-200 bg-white/95 p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900/95">
+                {suggestionsLoading ? (
+                  <p className="px-2 py-2 text-xs text-slate-500 dark:text-slate-300">Loading suggestions...</p>
+                ) : (
+                  <div className="space-y-2">
+                    {suggestions.trendingCities.length ? (
+                      <div>
+                        <p className="px-2 text-[10px] font-bold uppercase tracking-wider text-slate-500">Trending</p>
+                        <div className="mt-1 flex flex-wrap gap-1.5 px-1">
+                          {suggestions.trendingCities.slice(0, 4).map((city) => (
+                            <button key={`trend-${city}`} type="button" onMouseDown={() => applySuggestion(city, "city")} className="rounded-full bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
+                              {city}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {suggestions.cities.slice(0, 5).map((city) => (
+                      <button key={`city-${city}`} type="button" onMouseDown={() => applySuggestion(city, "city")} className="block w-full rounded-lg px-2 py-1.5 text-left text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+                        {city}
+                      </button>
+                    ))}
+
+                    {suggestions.states.slice(0, 3).map((state) => (
+                      <button key={`state-${state}`} type="button" onMouseDown={() => applySuggestion(state, "state")} className="block w-full rounded-lg px-2 py-1.5 text-left text-xs text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">
+                        In state: {state}
+                      </button>
+                    ))}
+
+                    {suggestions.hotels.slice(0, 3).map((hotel) => (
+                      <button
+                        key={hotel._id || hotel.name}
+                        type="button"
+                        onMouseDown={() => applySuggestion(hotel.location?.city || hotel.name, "city")}
+                        className="block w-full rounded-lg px-2 py-1.5 text-left text-xs text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                      >
+                        {hotel.name} • {hotel.location?.city}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </div>
 
           <select className="input" value={filters.state} onChange={(e) => setFilters((p) => ({ ...p, state: e.target.value }))}>
             <option value="">All states</option>
@@ -297,7 +435,7 @@ export default function HotelsPage() {
           </div>
         ) : null}
 
-        <p className="text-[11px] text-slate-500 dark:text-slate-400 lg:text-xs">Showing {displayedHotels.length} of {pagination.total || displayedHotels.length} hotels</p>
+        <p className="text-[11px] text-slate-500 dark:text-slate-400 lg:text-xs">Showing {hotelsForGrid.length} of {pagination.total || hotelsForGrid.length} hotels</p>
       </motion.section>
 
       <div className="space-y-3 lg:space-y-4">
@@ -334,26 +472,11 @@ export default function HotelsPage() {
             : hotelsForGrid.slice(0, mapDrivenSearch && showMap ? 60 : hotelsForGrid.length).map((hotel) => <HotelCard key={hotel._id} hotel={hotel} />)}
         </div>
 
-        {!mapDrivenSearch || !showMap ? (
-        <div className="flex items-center justify-center gap-2.5 lg:gap-3">
-          <button
-            type="button"
-            className="btn-secondary px-3.5 py-1.5 text-[12px] sm:px-4 sm:py-2 sm:text-sm lg:px-5 lg:py-2.5"
-            disabled={pagination.page <= 1}
-            onClick={() => setFilters((p) => ({ ...p, page: p.page - 1 }))}
-          >
-            Prev
-          </button>
-          <span className="text-[12px] font-semibold text-slate-600 dark:text-slate-300 sm:text-sm lg:text-base">Page {pagination.page} / {pagination.pages || 1}</span>
-          <button
-            type="button"
-            className="btn-secondary px-3.5 py-1.5 text-[12px] sm:px-4 sm:py-2 sm:text-sm lg:px-5 lg:py-2.5"
-            disabled={pagination.page >= pagination.pages}
-            onClick={() => setFilters((p) => ({ ...p, page: p.page + 1 }))}
-          >
-            Next
-          </button>
-        </div>
+        {!showMap && !mapDrivenSearch ? (
+          <div ref={loadMoreRef} className="flex min-h-10 items-center justify-center">
+            {isLoadingMore ? <p className="text-xs font-semibold text-slate-500">Loading more stays...</p> : null}
+            {!loading && pagination.page >= pagination.pages ? <p className="text-xs font-semibold text-slate-400">You have reached the end of the list.</p> : null}
+          </div>
         ) : null}
       </div>
       </div>

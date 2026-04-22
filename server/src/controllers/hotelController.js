@@ -3,6 +3,11 @@ const Hotel = require("../models/Hotel");
 const Review = require("../models/Review");
 const Booking = require("../models/Booking");
 const { getBookedCount } = require("../services/availabilityService");
+const {
+  buildCacheKey,
+  getCacheJSON,
+  setCacheJSON,
+} = require("../services/cacheService");
 
 exports.getHotels = async (req, res, next) => {
   try {
@@ -21,6 +26,16 @@ exports.getHotels = async (req, res, next) => {
       checkOut,
       roomType,
     } = req.query;
+
+    const canUseCache = !(checkIn && checkOut && roomType);
+    const cacheKey = buildCacheKey("hotels:list", req.query);
+
+    if (canUseCache) {
+      const cached = await getCacheJSON(cacheKey);
+      if (cached) {
+        return res.json(cached);
+      }
+    }
 
     const query = { isActive: true };
 
@@ -75,10 +90,16 @@ exports.getHotels = async (req, res, next) => {
       data = data.filter(Boolean);
     }
 
-    res.json({
+    const payload = {
       data,
       pagination: { total, page: Number(page), pages: Math.ceil(total / Number(limit)) },
-    });
+    };
+
+    if (canUseCache) {
+      await setCacheJSON(cacheKey, payload, 90);
+    }
+
+    res.json(payload);
   } catch (error) {
     next(error);
   }
@@ -90,6 +111,12 @@ exports.getHotelById = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid hotel id" });
     }
 
+    const cacheKey = buildCacheKey("hotels:detail", { id: req.params.id });
+    const cached = await getCacheJSON(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
     const hotel = await Hotel.findById(req.params.id);
     if (!hotel) return res.status(404).json({ message: "Hotel not found" });
 
@@ -98,7 +125,9 @@ exports.getHotelById = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .limit(10);
 
-    res.json({ hotel, reviews });
+    const payload = { hotel, reviews };
+    await setCacheJSON(cacheKey, payload, 120);
+    res.json(payload);
   } catch (error) {
     next(error);
   }
@@ -107,6 +136,12 @@ exports.getHotelById = async (req, res, next) => {
 exports.getSearchSuggestions = async (req, res, next) => {
   try {
     const q = String(req.query.q || "").trim();
+    const cacheKey = buildCacheKey("hotels:suggestions", { q: q.toLowerCase() });
+    const cached = await getCacheJSON(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
+
     const safeRegex = q ? new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") : null;
 
     const [trendingCities, citySuggestions, stateSuggestions, hotelSuggestions] = await Promise.all([
@@ -140,7 +175,7 @@ exports.getSearchSuggestions = async (req, res, next) => {
     const uniqueCities = [...new Set(citySuggestions.map((h) => h.location.city).filter(Boolean))].slice(0, 8);
     const uniqueStates = [...new Set(stateSuggestions.map((h) => h.location.state).filter(Boolean))].slice(0, 8);
 
-    res.json({
+    const payload = {
       query: q,
       suggestions: {
         trendingCities: trendingCities.map((city) => city._id).filter(Boolean),
@@ -148,7 +183,10 @@ exports.getSearchSuggestions = async (req, res, next) => {
         states: uniqueStates,
         hotels: hotelSuggestions,
       },
-    });
+    };
+
+    await setCacheJSON(cacheKey, payload, 120);
+    res.json(payload);
   } catch (error) {
     next(error);
   }
@@ -158,6 +196,12 @@ exports.getSimilarHotels = async (req, res, next) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: "Invalid hotel id" });
+    }
+
+    const cacheKey = buildCacheKey("hotels:similar", { id: req.params.id });
+    const cached = await getCacheJSON(cacheKey);
+    if (cached) {
+      return res.json(cached);
     }
 
     const current = await Hotel.findById(req.params.id);
@@ -178,7 +222,9 @@ exports.getSimilarHotels = async (req, res, next) => {
       .sort({ ratingAverage: -1, ratingCount: -1 })
       .limit(12);
 
-    res.json({ data: similar });
+    const payload = { data: similar };
+    await setCacheJSON(cacheKey, payload, 120);
+    res.json(payload);
   } catch (error) {
     next(error);
   }
@@ -187,6 +233,11 @@ exports.getSimilarHotels = async (req, res, next) => {
 exports.getRecommendedHotels = async (req, res, next) => {
   try {
     const userId = req.user._id;
+    const cacheKey = buildCacheKey("hotels:recommended", { userId: String(userId) });
+    const cached = await getCacheJSON(cacheKey);
+    if (cached) {
+      return res.json(cached);
+    }
 
     const [recentBookings, userWithFavorites] = await Promise.all([
       Booking.find({ user: userId, bookingStatus: "confirmed" })
@@ -232,13 +283,16 @@ exports.getRecommendedHotels = async (req, res, next) => {
         .limit(16);
     }
 
-    res.json({
+    const payload = {
       data: recommendations,
       meta: {
         preferredCities,
         preferredStates,
       },
-    });
+    };
+
+    await setCacheJSON(cacheKey, payload, 90);
+    res.json(payload);
   } catch (error) {
     next(error);
   }
