@@ -1,32 +1,32 @@
 const REGION_DATA = [
-  { state: "Andhra Pradesh", city: "Visakhapatnam", lat: 17.6868, lng: 83.2185, address: "Beach Road", priceBase: 4200 },
+  { state: "Andhra Pradesh", city: "Visakhapatnam", lat: 17.6868, lng: 83.2185, address: "Beach Road", priceBase: 3200 },
   { state: "Arunachal Pradesh", city: "Itanagar", lat: 27.0844, lng: 93.6053, address: "NH-415 Corridor", priceBase: 3800 },
   { state: "Assam", city: "Guwahati", lat: 26.1445, lng: 91.7362, address: "GS Road", priceBase: 3600 },
   { state: "Bihar", city: "Patna", lat: 25.5941, lng: 85.1376, address: "Boring Road", priceBase: 3200 },
   { state: "Chhattisgarh", city: "Raipur", lat: 21.2514, lng: 81.6296, address: "VIP Road", priceBase: 3300 },
-  { state: "Goa", city: "Panaji", lat: 15.4909, lng: 73.8278, address: "Miramar Beach Road", priceBase: 5200 },
+  { state: "Goa", city: "Panaji", lat: 15.4909, lng: 73.8278, address: "Miramar Beach Road", priceBase: 3800 },
   { state: "Gujarat", city: "Ahmedabad", lat: 23.0225, lng: 72.5714, address: "SG Highway", priceBase: 3900 },
-  { state: "Haryana", city: "Gurugram", lat: 28.4595, lng: 77.0266, address: "Golf Course Road", priceBase: 4800 },
+  { state: "Haryana", city: "Gurugram", lat: 28.4595, lng: 77.0266, address: "Golf Course Road", priceBase: 3600 },
   { state: "Himachal Pradesh", city: "Shimla", lat: 31.1048, lng: 77.1734, address: "Mall Road", priceBase: 4700 },
   { state: "Jharkhand", city: "Ranchi", lat: 23.3441, lng: 85.3096, address: "Main Road", priceBase: 3100 },
   { state: "Karnataka", city: "Bengaluru", lat: 12.9716, lng: 77.5946, address: "MG Road", priceBase: 4300 },
   { state: "Kerala", city: "Kochi", lat: 9.9312, lng: 76.2673, address: "Marine Drive", priceBase: 4100 },
   { state: "Madhya Pradesh", city: "Indore", lat: 22.7196, lng: 75.8577, address: "Ring Road", priceBase: 3400 },
-  { state: "Maharashtra", city: "Mumbai", lat: 19.076, lng: 72.8777, address: "Marine Drive", priceBase: 6500 },
+  { state: "Maharashtra", city: "Mumbai", lat: 19.076, lng: 72.8777, address: "Marine Drive", priceBase: 4300 },
   { state: "Manipur", city: "Imphal", lat: 24.817, lng: 93.9368, address: "Airport Road", priceBase: 3000 },
   { state: "Meghalaya", city: "Shillong", lat: 25.5788, lng: 91.8933, address: "Police Bazar", priceBase: 3600 },
   { state: "Mizoram", city: "Aizawl", lat: 23.7271, lng: 92.7176, address: "Chhinga Veng", priceBase: 2900 },
   { state: "Nagaland", city: "Kohima", lat: 25.6751, lng: 94.1086, address: "TCP Gate", priceBase: 2800 },
   { state: "Odisha", city: "Bhubaneswar", lat: 20.2961, lng: 85.8245, address: "Jayadev Vihar", priceBase: 3500 },
   { state: "Punjab", city: "Amritsar", lat: 31.634, lng: 74.8723, address: "Mall Road", priceBase: 3900 },
-  { state: "Rajasthan", city: "Jaipur", lat: 26.9124, lng: 75.7873, address: "MI Road", priceBase: 4600 },
+  { state: "Rajasthan", city: "Jaipur", lat: 26.9124, lng: 75.7873, address: "MI Road", priceBase: 3500 },
   { state: "Sikkim", city: "Gangtok", lat: 27.3389, lng: 88.6065, address: "MG Marg", priceBase: 4300 },
-  { state: "Tamil Nadu", city: "Chennai", lat: 13.0827, lng: 80.2707, address: "T Nagar", priceBase: 4400 },
-  { state: "Telangana", city: "Hyderabad", lat: 17.385, lng: 78.4867, address: "HITEC City", priceBase: 4700 },
+  { state: "Tamil Nadu", city: "Chennai", lat: 13.0827, lng: 80.2707, address: "T Nagar", priceBase: 3400 },
+  { state: "Telangana", city: "Hyderabad", lat: 17.385, lng: 78.4867, address: "HITEC City", priceBase: 3600 },
   { state: "Tripura", city: "Agartala", lat: 23.8315, lng: 91.2868, address: "Airport Road", priceBase: 2900 },
   { state: "Uttar Pradesh", city: "Lucknow", lat: 26.8467, lng: 80.9462, address: "Gomti Nagar", priceBase: 3500 },
   { state: "Uttarakhand", city: "Dehradun", lat: 30.3165, lng: 78.0322, address: "Rajpur Road", priceBase: 4000 },
-  { state: "West Bengal", city: "Kolkata", lat: 22.5726, lng: 88.3639, address: "Park Street", priceBase: 4200 },
+  { state: "West Bengal", city: "Kolkata", lat: 22.5726, lng: 88.3639, address: "Park Street", priceBase: 3300 },
 ];
 
 const HOTEL_PREFIXES = ["Grand", "Heritage", "Premium", "Royal", "Celestial", "Vista", "Serene", "Horizon", "Marina", "Orchid", "Amber", "Palm", "Summit", "Luxe", "Crest", "Aster", "Bluebell", "Coral", "Zen", "Sapphire", "Emerald", "Regal", "Terra", "Elysian"];
@@ -87,10 +87,10 @@ function generateIndiaHotels(perState = 36) {
       const name = `${prefix} ${region.city} ${suffix} ${hotelNumber}`;
       const description = `${DESCRIPTORS[Math.floor(random() * DESCRIPTORS.length)]} ${HOTEL_TYPES[Math.floor(random() * HOTEL_TYPES.length)]} in ${region.city}, ${region.state}.`;
       const area = `${region.address} ${hotelNumber}`;
-      const basePrice = Math.round(region.priceBase + random() * 2200);
-      const single = Math.round(basePrice * (0.78 + random() * 0.06));
-      const double = Math.round(single * (1.32 + random() * 0.08));
-      const suite = Math.round(double * (1.58 + random() * 0.1));
+      const basePrice = Math.round(region.priceBase + random() * 1200);
+      const single = Math.round(basePrice * (0.84 + random() * 0.05));
+      const double = Math.round(single * (1.18 + random() * 0.07));
+      const suite = Math.round(double * (1.26 + random() * 0.08));
       const ratingAverage = round(3.7 + random() * 1.2, 1);
       const ratingCount = 12 + Math.floor(random() * 190);
 

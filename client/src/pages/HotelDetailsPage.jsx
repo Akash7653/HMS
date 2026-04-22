@@ -284,9 +284,9 @@ export default function HotelDetailsPage() {
   ];
 
   const defaultBudgetGuidance = [
-    { tier: "Budget", nightlyRange: "Rs. 2500 - Rs. 5000", note: "Good for short city trips and practical stays." },
-    { tier: "Comfort", nightlyRange: "Rs. 5000 - Rs. 9000", note: "Balanced option for families and business travelers." },
-    { tier: "Luxury", nightlyRange: "Rs. 9000+", note: "Premium amenities, views, and curated experiences." },
+    { tier: "Budget", nightlyRange: "Rs. 1800 - Rs. 3800", note: "Good for short city trips and practical stays." },
+    { tier: "Comfort", nightlyRange: "Rs. 3800 - Rs. 6500", note: "Balanced option for families and business travelers." },
+    { tier: "Premium", nightlyRange: "Rs. 6500+", note: "Better amenities, larger rooms, and enhanced experiences." },
   ];
 
   const hotelRules = hotel?.guestPolicy?.rules?.length ? hotel.guestPolicy.rules : defaultHotelRules;
