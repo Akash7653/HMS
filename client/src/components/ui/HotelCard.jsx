@@ -72,6 +72,15 @@ function ProgressiveHotelImage({ src, alt }) {
 function HotelCard({ hotel }) {
   const minPrice = Math.min(...hotel.roomTypes.map((r) => r.basePrice));
   const stateLabel = hotel.location?.state || hotel.location?.city || "India";
+  const now = new Date();
+  const day = now.getDay();
+  const month = now.getMonth() + 1;
+  const pricingBadge = month === 10 || month === 11 ? "Festival pricing" : day === 0 || day === 6 ? "Weekend surge" : "Weekday deal";
+  const pricingBadgeClass = month === 10 || month === 11
+    ? "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
+    : day === 0 || day === 6
+      ? "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300"
+      : "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300";
 
   return (
     <article className="card group hover-lift overflow-hidden" style={{ contentVisibility: "auto", containIntrinsicSize: "320px" }}>
@@ -84,6 +93,7 @@ function HotelCard({ hotel }) {
           <span className="rounded-full bg-brand-100 px-2 py-1 font-semibold text-brand-800 dark:bg-brand-900/50 dark:text-brand-200">
             {hotel.ratingAverage?.toFixed?.(1) || "0.0"} / 5
           </span>
+          <span className={`rounded-full px-2 py-1 font-semibold ${pricingBadgeClass}`}>{pricingBadge}</span>
         </div>
         <div className="flex items-end justify-between pt-0.5">
           <div>

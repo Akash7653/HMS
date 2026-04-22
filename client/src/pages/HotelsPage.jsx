@@ -21,6 +21,7 @@ const defaultFilters = {
 const amenities = ["WiFi", "AC", "Pool"];
 
 export default function HotelsPage() {
+  const savedAlertsKey = "hms_saved_search_alerts";
   const [params] = useSearchParams();
   const [scope, setScope] = useState("India");
   const [filters, setFilters] = useState({
@@ -33,6 +34,17 @@ export default function HotelsPage() {
   const [loading, setLoading] = useState(true);
   const [mapLoading, setMapLoading] = useState(false);
   const [showMap, setShowMap] = useState(false);
+  const [mapDrivenSearch, setMapDrivenSearch] = useState(false);
+  const [viewportHotelIds, setViewportHotelIds] = useState([]);
+  const [viewportInfo, setViewportInfo] = useState({ visibleCount: 0, markerCount: 0, zoom: 4 });
+  const [savedAlerts, setSavedAlerts] = useState(() => {
+    try {
+      const raw = localStorage.getItem(savedAlertsKey);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
 
   const fetchHotels = useCallback(async (mode = "page") => {
@@ -92,6 +104,10 @@ export default function HotelsPage() {
     fetchHotels("map");
   }, [showMap, fetchHotels]);
 
+  useEffect(() => {
+    localStorage.setItem(savedAlertsKey, JSON.stringify(savedAlerts.slice(0, 10)));
+  }, [savedAlerts]);
+
   const applyLocalFilters = (list) => {
     let result = [...list];
 
@@ -113,6 +129,23 @@ export default function HotelsPage() {
   const displayedHotels = useMemo(() => applyLocalFilters(hotels), [hotels, selectedAmenities, filters.sortBy]);
   const displayedMapHotels = useMemo(() => applyLocalFilters(mapHotels), [mapHotels, selectedAmenities, filters.sortBy]);
 
+  const viewportHotelIdSet = useMemo(() => new Set(viewportHotelIds), [viewportHotelIds]);
+
+  const viewportMatchedHotels = useMemo(
+    () => displayedMapHotels.filter((hotel) => viewportHotelIdSet.has(hotel._id)),
+    [displayedMapHotels, viewportHotelIdSet]
+  );
+
+  const hotelsForGrid = mapDrivenSearch && showMap ? viewportMatchedHotels : displayedHotels;
+
+  const dynamicPricingBadge = useMemo(() => {
+    const day = new Date().getDay();
+    const month = new Date().getMonth() + 1;
+    if (month === 10 || month === 11) return "Festival pricing live";
+    if (day === 0 || day === 6) return "Weekend surge pricing";
+    return "Weekday deal pricing";
+  }, []);
+
   const onSearch = (e) => {
     e.preventDefault();
     setFilters((p) => ({ ...p, page: 1 }));
@@ -122,6 +155,46 @@ export default function HotelsPage() {
     setSelectedAmenities((prev) =>
       prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name]
     );
+  };
+
+  const onMapViewportChange = useCallback((payload) => {
+    setViewportHotelIds(payload.visibleHotelIds || []);
+    setViewportInfo({
+      visibleCount: payload.visibleCount || 0,
+      markerCount: payload.markerCount || 0,
+      zoom: payload.zoom || 4,
+    });
+  }, []);
+
+  const saveCurrentAlert = () => {
+    const titleParts = [];
+    if (filters.state) titleParts.push(filters.state);
+    if (filters.city) titleParts.push(filters.city);
+    if (filters.minPrice || filters.maxPrice) titleParts.push(`Rs. ${filters.minPrice || 0}-${filters.maxPrice || "max"}`);
+    const title = titleParts.length ? titleParts.join(" • ") : "India hotels";
+
+    const alert = {
+      id: Date.now(),
+      title,
+      filters: {
+        city: filters.city,
+        state: filters.state,
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice,
+        rating: filters.rating,
+        sortBy: filters.sortBy,
+      },
+    };
+
+    setSavedAlerts((prev) => [alert, ...prev].slice(0, 10));
+  };
+
+  const applySavedAlert = (alert) => {
+    setFilters((prev) => ({ ...prev, ...alert.filters, page: 1 }));
+  };
+
+  const deleteSavedAlert = (id) => {
+    setSavedAlerts((prev) => prev.filter((alert) => alert.id !== id));
   };
 
   return (
@@ -201,16 +274,49 @@ export default function HotelsPage() {
           </div>
 
           <button type="submit" className="btn-primary w-full bg-gradient-to-r from-blue-600 to-cyan-500 py-2.5 text-sm lg:py-3">Search</button>
+          <button type="button" className="btn-secondary w-full border border-cyan-200/70 bg-white/80 py-2 text-sm dark:border-slate-700/60 dark:bg-slate-900/70" onClick={saveCurrentAlert}>
+            Save Search Alert
+          </button>
         </form>
+
+        {savedAlerts.length ? (
+          <div className="space-y-2 rounded-2xl border border-slate-200/80 bg-white/80 p-2.5 dark:border-slate-700/60 dark:bg-slate-900/70">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Saved alerts</p>
+            <div className="space-y-1.5">
+              {savedAlerts.map((alert) => (
+                <div key={alert.id} className="flex items-center gap-2">
+                  <button type="button" className="flex-1 rounded-lg bg-slate-100 px-2 py-1 text-left text-[11px] font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200" onClick={() => applySavedAlert(alert)}>
+                    {alert.title}
+                  </button>
+                  <button type="button" className="rounded-lg border border-rose-200 px-2 py-1 text-[11px] font-semibold text-rose-600 dark:border-rose-700/60 dark:text-rose-300" onClick={() => deleteSavedAlert(alert.id)}>
+                    Remove
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <p className="text-[11px] text-slate-500 dark:text-slate-400 lg:text-xs">Showing {displayedHotels.length} of {pagination.total || displayedHotels.length} hotels</p>
       </motion.section>
 
       <div className="space-y-3 lg:space-y-4">
         <div className="hidden items-center justify-between rounded-2xl border border-slate-200/70 bg-white/75 px-4 py-3 text-sm text-slate-600 shadow-sm dark:border-slate-700/60 dark:bg-slate-900/65 dark:text-slate-300 lg:flex">
-          <p className="font-semibold">{displayedHotels.length} stays matched</p>
+          <p className="font-semibold">{hotelsForGrid.length} stays matched</p>
           <p>Sorted by <span className="font-semibold">{filters.sortBy === "popularity" ? "Newest" : filters.sortBy === "price" ? "Price" : "Rating"}</span></p>
         </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-blue-100/80 bg-blue-50/70 px-3 py-2 text-[11px] font-semibold text-blue-700 dark:border-blue-900/40 dark:bg-blue-950/25 dark:text-blue-300">
+          <span>{dynamicPricingBadge}</span>
+          {showMap ? <span>Viewport: {viewportInfo.visibleCount} hotels • {viewportInfo.markerCount} markers • z{viewportInfo.zoom}</span> : null}
+        </div>
+
+        {showMap ? (
+          <label className="inline-flex items-center gap-2 rounded-xl border border-slate-200/80 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-700 dark:border-slate-700/60 dark:bg-slate-900/70 dark:text-slate-200">
+            <input type="checkbox" checked={mapDrivenSearch} onChange={(e) => setMapDrivenSearch(e.target.checked)} />
+            Drag map to auto-filter hotel list in viewport
+          </label>
+        ) : null}
 
         {showMap ? (
           mapLoading ? (
@@ -218,16 +324,17 @@ export default function HotelsPage() {
               Loading map markers...
             </section>
           ) : (
-            <HotelMap hotels={displayedMapHotels} title="Filtered India hotels" />
+            <HotelMap hotels={displayedMapHotels} title="Filtered India hotels" onViewportChange={onMapViewportChange} />
           )
         ) : null}
 
         <div className="grid gap-3 sm:grid-cols-2 lg:gap-4 xl:grid-cols-3 2xl:grid-cols-4">
           {loading
             ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
-            : displayedHotels.map((hotel) => <HotelCard key={hotel._id} hotel={hotel} />)}
+            : hotelsForGrid.slice(0, mapDrivenSearch && showMap ? 60 : hotelsForGrid.length).map((hotel) => <HotelCard key={hotel._id} hotel={hotel} />)}
         </div>
 
+        {!mapDrivenSearch || !showMap ? (
         <div className="flex items-center justify-center gap-2.5 lg:gap-3">
           <button
             type="button"
@@ -247,6 +354,7 @@ export default function HotelsPage() {
             Next
           </button>
         </div>
+        ) : null}
       </div>
       </div>
     </div>

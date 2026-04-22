@@ -1,25 +1,27 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState, useRef } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AnimatePresence, motion } from "framer-motion";
 import Navbar from "./components/ui/Navbar";
 import MobileBottomNav from "./components/ui/MobileBottomNav";
 import GlobalFooter from "./components/ui/GlobalFooter";
+import MobileSupportStrip from "./components/ui/MobileSupportStrip";
 import ProtectedRoute from "./components/ui/ProtectedRoute";
-import HomePage from "./pages/HomePage";
-import HotelsPage from "./pages/HotelsPage";
-import HotelDetailsPage from "./pages/HotelDetailsPage";
-import BookingCheckoutPage from "./pages/BookingCheckoutPage";
-import BookingConfirmationPage from "./pages/BookingConfirmationPage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import BookingHistoryPage from "./pages/BookingHistoryPage";
-import PaymentHistoryPage from "./pages/PaymentHistoryPage";
-import WishlistPage from "./pages/WishlistPage";
-import AdminPage from "./pages/AdminPage";
-import ProfilePage from "./pages/ProfilePage";
 import AiChatWidget from "./components/ui/AiChatWidget";
 import { useAuth } from "./context/AuthContext";
+
+const HomePage = lazy(() => import("./pages/HomePage"));
+const HotelsPage = lazy(() => import("./pages/HotelsPage"));
+const HotelDetailsPage = lazy(() => import("./pages/HotelDetailsPage"));
+const BookingCheckoutPage = lazy(() => import("./pages/BookingCheckoutPage"));
+const BookingConfirmationPage = lazy(() => import("./pages/BookingConfirmationPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/RegisterPage"));
+const BookingHistoryPage = lazy(() => import("./pages/BookingHistoryPage"));
+const PaymentHistoryPage = lazy(() => import("./pages/PaymentHistoryPage"));
+const WishlistPage = lazy(() => import("./pages/WishlistPage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 
 export default function App() {
   const { user } = useAuth();
@@ -170,6 +172,7 @@ export default function App() {
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.24, ease: "easeOut" }}
           >
+            <Suspense fallback={<div className="mx-auto max-w-6xl px-4 py-10 text-sm text-slate-500">Loading page...</div>}>
             <Routes location={location}>
               <Route path="/" element={<HomePage />} />
               <Route path="/hotels" element={<HotelsPage />} />
@@ -234,10 +237,12 @@ export default function App() {
               />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
+            </Suspense>
           </motion.div>
         </AnimatePresence>
       </main>
-      {!hideFooter ? <GlobalFooter /> : null}
+      {!hideFooter ? <MobileSupportStrip /> : null}
+      {!hideFooter ? <div className="hidden md:block"><GlobalFooter /></div> : null}
       {!hideBottomNav ? <MobileBottomNav isLoggedIn={Boolean(user)} /> : null}
       {!hideAiChat ? <AiChatWidget /> : null}
       <Toaster position="bottom-right" />
