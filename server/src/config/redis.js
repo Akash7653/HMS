@@ -8,8 +8,9 @@ function getRedisClient() {
 }
 
 async function connectRedis() {
-  const redisUrl = process.env.REDIS_URL;
-
+  // Support both traditional Redis and Upstash HTTPS URLs
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.REDIS_URL;
+  
   if (!redisUrl) {
     console.log("[REDIS] REDIS_URL not configured, running without cache");
     return null;
