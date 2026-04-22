@@ -50,6 +50,7 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
+    api.post("/auth/logout").catch(() => null);
     localStorage.removeItem("hms_token");
     setUser(null);
   };

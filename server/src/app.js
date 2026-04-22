@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 
 const authRoutes = require("./routes/authRoutes");
 const hotelRoutes = require("./routes/hotelRoutes");
@@ -15,6 +16,7 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 
 const { errorHandler, notFound } = require("./middleware/errorHandler");
+const { authLimiter, searchLimiter, paymentsLimiter } = require("./middleware/rateLimiter");
 
 const app = express();
 
@@ -38,6 +40,7 @@ app.use(cors({
 app.options("*", cors());
 app.use(helmet());
 app.use(morgan("dev"));
+app.use(cookieParser());
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -45,15 +48,15 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-app.use("/api/auth", authRoutes);
-app.use("/api/hotels", hotelRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
+app.use("/api/hotels", searchLimiter, hotelRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/notifications", notificationRoutes);
-app.use("/api/payments", paymentRoutes);
+app.use("/api/payments", paymentsLimiter, paymentRoutes);
 app.use("/api/ai", aiRoutes);
 
 app.use(notFound);

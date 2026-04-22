@@ -14,6 +14,8 @@ const userSchema = new mongoose.Schema(
     emailVerified: { type: Boolean, default: false },
     phoneVerified: { type: Boolean, default: false },
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Hotel" }],
+    refreshTokenHash: { type: String, default: "", select: false },
+    refreshTokenExpiresAt: { type: Date, default: null, select: false },
   },
   { timestamps: true }
 );
