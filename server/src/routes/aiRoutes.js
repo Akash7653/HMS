@@ -1,5 +1,5 @@
 const express = require("express");
-const { protect } = require("../middleware/authMiddleware");
+const { protect } = require("../middleware/auth");
 const { chat, chatbot, getPricingInsights, getMarketTrends } = require("../controllers/aiController");
 
 const router = express.Router();
