@@ -1,24 +1,26 @@
 const redis = require('redis');
+const axios = require('axios');
 
 class RedisService {
   constructor() {
     this.client = null;
+    this.httpClient = null;
     this.isConnected = false;
+    this.isUpstash = false;
   }
 
   async connect() {
     try {
       // Support both traditional Redis and Upstash HTTPS URLs
-      const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+      const redisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.REDIS_URL || 'redis://localhost:6379';
       
       // For Upstash (HTTPS), use different configuration
       if (redisUrl.startsWith('https://')) {
         // Upstash uses REST API, not direct Redis protocol
-        const axios = require('axios');
         this.httpClient = axios.create({
           baseURL: redisUrl,
           headers: {
-            'Authorization': `Bearer ${process.env.REDIS_PASSWORD || ''}`
+            'Authorization': `Bearer ${process.env.UPSTASH_REDIS_REST_TOKEN || ''}`
           }
         });
         console.log('Upstash Redis client configured');
