@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { Link } from "react-router-dom";
@@ -32,20 +32,30 @@ function FitBounds({ hotels }) {
 }
 
 function ViewportObserver({ onChange }) {
+  const debounceRef = useRef(null);
+
+  const emitViewport = (map) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      const bounds = map.getBounds();
+      onChange({ bounds, zoom: map.getZoom() });
+    }, 180);
+  };
+
   const map = useMapEvents({
     moveend: () => {
-      const bounds = map.getBounds();
-      onChange({ bounds, zoom: map.getZoom() });
+      emitViewport(map);
     },
     zoomend: () => {
-      const bounds = map.getBounds();
-      onChange({ bounds, zoom: map.getZoom() });
+      emitViewport(map);
     },
   });
 
   useEffect(() => {
-    const bounds = map.getBounds();
-    onChange({ bounds, zoom: map.getZoom() });
+    emitViewport(map);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, [map, onChange]);
 
   return null;
@@ -58,6 +68,14 @@ function getClusterCellSize(zoom) {
   if (zoom <= 7) return 0.65;
   if (zoom <= 8) return 0.4;
   return 0;
+}
+
+function getMarkerBudget(zoom) {
+  if (zoom <= 4) return 160;
+  if (zoom <= 6) return 220;
+  if (zoom <= 8) return 320;
+  if (zoom <= 10) return 440;
+  return 560;
 }
 
 function buildClusteredMarkers(hotels, zoom) {
@@ -142,6 +160,14 @@ export default function HotelMap({ hotels, title = "Live hotel map", onViewportC
     [hotelsInViewport, viewport.zoom]
   );
 
+  const virtualizedMarkers = useMemo(() => {
+    const budget = getMarkerBudget(viewport.zoom);
+    if (markers.length <= budget) return markers;
+
+    const step = Math.ceil(markers.length / budget);
+    return markers.filter((_, index) => index % step === 0);
+  }, [markers, viewport.zoom]);
+
   useEffect(() => {
     if (!onViewportChange) return;
     onViewportChange({
@@ -149,9 +175,9 @@ export default function HotelMap({ hotels, title = "Live hotel map", onViewportC
       visibleHotels: hotelsInViewport,
       visibleHotelIds: hotelsInViewport.map((hotel) => hotel._id),
       visibleCount: hotelsInViewport.length,
-      markerCount: markers.length,
+      markerCount: virtualizedMarkers.length,
     });
-  }, [hotelsInViewport, markers.length, onViewportChange, viewport.zoom]);
+  }, [hotelsInViewport, onViewportChange, viewport.zoom, virtualizedMarkers.length]);
 
   return (
     <section className="card space-y-3 border-blue-100/70 bg-white/80 p-3 shadow-xl dark:border-slate-700 dark:bg-slate-900/70 lg:p-4">
@@ -161,7 +187,7 @@ export default function HotelMap({ hotels, title = "Live hotel map", onViewportC
           <h3 className="font-display text-lg font-bold text-slate-900 dark:text-white lg:text-xl">{title}</h3>
         </div>
         <span className="rounded-full bg-blue-50 px-3 py-1 text-[11px] font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-          {markers.length} markers
+          {virtualizedMarkers.length} markers
         </span>
       </div>
 
@@ -173,7 +199,7 @@ export default function HotelMap({ hotels, title = "Live hotel map", onViewportC
           />
           <ViewportObserver onChange={setViewport} />
           <FitBounds hotels={visibleHotels} />
-          {markers.map((marker) => {
+          {virtualizedMarkers.map((marker) => {
             if (marker.type === "cluster" && marker.hotels.length > 1) {
               const radius = Math.min(22, 8 + Math.log2(marker.hotels.length + 1) * 3);
               return (
@@ -235,7 +261,7 @@ export default function HotelMap({ hotels, title = "Live hotel map", onViewportC
       </div>
 
       <p className="text-[11px] text-slate-500 dark:text-slate-400 lg:text-xs">
-        Map markers are clustered by zoom for smoother rendering and can drive viewport-based search results.
+        Map markers are clustered, virtualized, and viewport updates are debounced for smoother rendering on low-end phones.
       </p>
     </section>
   );
