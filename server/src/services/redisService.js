@@ -23,6 +23,7 @@ class RedisService {
         });
         console.log('Upstash Redis client configured');
         this.isConnected = true;
+        this.isUpstash = true;
         return true;
       }
       
@@ -62,7 +63,15 @@ class RedisService {
     if (!this.isConnected) return false;
     
     try {
-      await this.client.setEx(searchKey, ttl, JSON.stringify(results));
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        await this.httpClient.post(`/set/${searchKey}`, JSON.stringify(results), {
+          params: { EX: ttl }
+        });
+      } else {
+        // Use traditional Redis
+        await this.client.setEx(searchKey, ttl, JSON.stringify(results));
+      }
       return true;
     } catch (error) {
       console.error('Error caching search results:', error);
@@ -74,8 +83,15 @@ class RedisService {
     if (!this.isConnected) return null;
     
     try {
-      const cached = await this.client.get(searchKey);
-      return cached ? JSON.parse(cached) : null;
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        const response = await this.httpClient.get(`/${searchKey}`);
+        return response.data ? JSON.parse(response.data) : null;
+      } else {
+        // Use traditional Redis
+        const cached = await this.client.get(searchKey);
+        return cached ? JSON.parse(cached) : null;
+      }
     } catch (error) {
       console.error('Error getting search results:', error);
       return null;
@@ -88,7 +104,15 @@ class RedisService {
     
     try {
       const key = `hotel:${hotelId}`;
-      await this.client.setEx(key, ttl, JSON.stringify(hotelData));
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        await this.httpClient.post(`/set/${key}`, JSON.stringify(hotelData), {
+          params: { EX: ttl }
+        });
+      } else {
+        // Use traditional Redis
+        await this.client.setEx(key, ttl, JSON.stringify(hotelData));
+      }
       return true;
     } catch (error) {
       console.error('Error caching hotel details:', error);
@@ -101,8 +125,15 @@ class RedisService {
     
     try {
       const key = `hotel:${hotelId}`;
-      const cached = await this.client.get(key);
-      return cached ? JSON.parse(cached) : null;
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        const response = await this.httpClient.get(`/${key}`);
+        return response.data ? JSON.parse(response.data) : null;
+      } else {
+        // Use traditional Redis
+        const cached = await this.client.get(key);
+        return cached ? JSON.parse(cached) : null;
+      }
     } catch (error) {
       console.error('Error getting hotel details:', error);
       return null;
@@ -115,7 +146,15 @@ class RedisService {
     
     try {
       const key = `availability:${hotelId}:${dateRange}`;
-      await this.client.setEx(key, ttl, JSON.stringify(availability));
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        await this.httpClient.post(`/set/${key}`, JSON.stringify(availability), {
+          params: { EX: ttl }
+        });
+      } else {
+        // Use traditional Redis
+        await this.client.setEx(key, ttl, JSON.stringify(availability));
+      }
       return true;
     } catch (error) {
       console.error('Error caching availability:', error);
@@ -128,8 +167,15 @@ class RedisService {
     
     try {
       const key = `availability:${hotelId}:${dateRange}`;
-      const cached = await this.client.get(key);
-      return cached ? JSON.parse(cached) : null;
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        const response = await this.httpClient.get(`/${key}`);
+        return response.data ? JSON.parse(response.data) : null;
+      } else {
+        // Use traditional Redis
+        const cached = await this.client.get(key);
+        return cached ? JSON.parse(cached) : null;
+      }
     } catch (error) {
       console.error('Error getting availability:', error);
       return null;
@@ -142,7 +188,15 @@ class RedisService {
     
     try {
       const key = `recommendations:${userId}`;
-      await this.client.setEx(key, ttl, JSON.stringify(recommendations));
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        await this.httpClient.post(`/set/${key}`, JSON.stringify(recommendations), {
+          params: { EX: ttl }
+        });
+      } else {
+        // Use traditional Redis
+        await this.client.setEx(key, ttl, JSON.stringify(recommendations));
+      }
       return true;
     } catch (error) {
       console.error('Error caching recommendations:', error);
@@ -155,8 +209,15 @@ class RedisService {
     
     try {
       const key = `recommendations:${userId}`;
-      const cached = await this.client.get(key);
-      return cached ? JSON.parse(cached) : null;
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        const response = await this.httpClient.get(`/${key}`);
+        return response.data ? JSON.parse(response.data) : null;
+      } else {
+        // Use traditional Redis
+        const cached = await this.client.get(key);
+        return cached ? JSON.parse(cached) : null;
+      }
     } catch (error) {
       console.error('Error getting recommendations:', error);
       return null;
@@ -169,7 +230,15 @@ class RedisService {
     
     try {
       const key = `pricing:${hotelId}:${checkInDate}`;
-      await this.client.setEx(key, ttl, JSON.stringify(insights));
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        await this.httpClient.post(`/set/${key}`, JSON.stringify(insights), {
+          params: { EX: ttl }
+        });
+      } else {
+        // Use traditional Redis
+        await this.client.setEx(key, ttl, JSON.stringify(insights));
+      }
       return true;
     } catch (error) {
       console.error('Error caching pricing insights:', error);
@@ -182,8 +251,15 @@ class RedisService {
     
     try {
       const key = `pricing:${hotelId}:${checkInDate}`;
-      const cached = await this.client.get(key);
-      return cached ? JSON.parse(cached) : null;
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        const response = await this.httpClient.get(`/${key}`);
+        return response.data ? JSON.parse(response.data) : null;
+      } else {
+        // Use traditional Redis
+        const cached = await this.client.get(key);
+        return cached ? JSON.parse(cached) : null;
+      }
     } catch (error) {
       console.error('Error getting pricing insights:', error);
       return null;
@@ -195,16 +271,34 @@ class RedisService {
     if (!this.isConnected) return { allowed: true, remaining: maxRequests };
     
     try {
-      const current = await this.client.incr(key);
-      
-      if (current === 1) {
-        await this.client.expire(key, Math.ceil(windowMs / 1000));
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        const response = await this.httpClient.post(`/incr/${key}`);
+        const current = parseInt(response.data) || 0;
+        
+        if (current === 1) {
+          await this.httpClient.post(`/expire/${key}`, null, {
+            params: { EX: Math.ceil(windowMs / 1000) }
+          });
+        }
+        
+        const remaining = Math.max(0, maxRequests - current);
+        const allowed = current <= maxRequests;
+        
+        return { allowed, remaining, current };
+      } else {
+        // Use traditional Redis
+        const current = await this.client.incr(key);
+        
+        if (current === 1) {
+          await this.client.expire(key, Math.ceil(windowMs / 1000));
+        }
+        
+        const remaining = Math.max(0, maxRequests - current);
+        const allowed = current <= maxRequests;
+        
+        return { allowed, remaining, current };
       }
-      
-      const remaining = Math.max(0, maxRequests - current);
-      const allowed = current <= maxRequests;
-      
-      return { allowed, remaining, current };
     } catch (error) {
       console.error('Error with rate limiting:', error);
       return { allowed: true, remaining: maxRequests };
@@ -216,7 +310,15 @@ class RedisService {
     if (!this.isConnected) return false;
     
     try {
-      await this.client.setEx(`session:${sessionId}`, ttl, JSON.stringify(sessionData));
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        await this.httpClient.post(`/set/session:${sessionId}`, JSON.stringify(sessionData), {
+          params: { EX: ttl }
+        });
+      } else {
+        // Use traditional Redis
+        await this.client.setEx(`session:${sessionId}`, ttl, JSON.stringify(sessionData));
+      }
       return true;
     } catch (error) {
       console.error('Error setting session:', error);
@@ -228,8 +330,15 @@ class RedisService {
     if (!this.isConnected) return null;
     
     try {
-      const cached = await this.client.get(`session:${sessionId}`);
-      return cached ? JSON.parse(cached) : null;
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        const response = await this.httpClient.get(`/session:${sessionId}`);
+        return response.data ? JSON.parse(response.data) : null;
+      } else {
+        // Use traditional Redis
+        const cached = await this.client.get(`session:${sessionId}`);
+        return cached ? JSON.parse(cached) : null;
+      }
     } catch (error) {
       console.error('Error getting session:', error);
       return null;
@@ -240,7 +349,13 @@ class RedisService {
     if (!this.isConnected) return false;
     
     try {
-      await this.client.del(`session:${sessionId}`);
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        await this.httpClient.del(`/session:${sessionId}`);
+      } else {
+        // Use traditional Redis
+        await this.client.del(`session:${sessionId}`);
+      }
       return true;
     } catch (error) {
       console.error('Error deleting session:', error);
@@ -253,9 +368,20 @@ class RedisService {
     if (!this.isConnected) return false;
     
     try {
-      const keys = await this.client.keys(`*${hotelId}*`);
-      if (keys.length > 0) {
-        await this.client.del(keys);
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        const keys = await this.httpClient.get(`/keys/*${hotelId}*`);
+        if (keys.data && keys.data.length > 0) {
+          for (const key of keys.data) {
+            await this.httpClient.del(`/keys/${key}`);
+          }
+        }
+      } else {
+        // Use traditional Redis
+        const keys = await this.client.keys(`*${hotelId}*`);
+        if (keys.length > 0) {
+          await this.client.del(keys);
+        }
       }
       return true;
     } catch (error) {
@@ -268,9 +394,20 @@ class RedisService {
     if (!this.isConnected) return false;
     
     try {
-      const keys = await this.client.keys(`*${userId}*`);
-      if (keys.length > 0) {
-        await this.client.del(keys);
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        const keys = await this.httpClient.get(`/keys/*${userId}*`);
+        if (keys.data && keys.data.length > 0) {
+          for (const key of keys.data) {
+            await this.httpClient.del(`/keys/${key}`);
+          }
+        }
+      } else {
+        // Use traditional Redis
+        const keys = await this.client.keys(`*${userId}*`);
+        if (keys.length > 0) {
+          await this.client.del(keys);
+        }
       }
       return true;
     } catch (error) {
@@ -285,8 +422,17 @@ class RedisService {
     
     try {
       const key = `events:${event}:${new Date().toISOString().split('T')[0]}`;
-      await this.client.incr(key);
-      await this.client.expire(key, 86400 * 30); // Keep for 30 days
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        await this.httpClient.post(`/incr/${key}`);
+        await this.httpClient.post(`/expire/${key}`, null, {
+          params: { EX: 86400 * 30 }
+        });
+      } else {
+        // Use traditional Redis
+        await this.client.incr(key);
+        await this.client.expire(key, 86400 * 30); // Keep for 30 days
+      }
       return true;
     } catch (error) {
       console.error('Error tracking event:', error);
@@ -299,8 +445,15 @@ class RedisService {
     
     try {
       const key = `events:${event}:${date}`;
-      const count = await this.client.get(key);
-      return parseInt(count) || 0;
+      if (this.isUpstash) {
+        // Use Upstash REST API
+        const response = await this.httpClient.get(`/${key}`);
+        return parseInt(response.data) || 0;
+      } else {
+        // Use traditional Redis
+        const count = await this.client.get(key);
+        return parseInt(count) || 0;
+      }
     } catch (error) {
       console.error('Error getting event count:', error);
       return 0;
@@ -312,8 +465,15 @@ class RedisService {
     if (!this.isConnected) return false;
     
     try {
-      await this.client.ping();
-      return true;
+      if (this.isUpstash) {
+        // Use Upstash REST API - simple health check
+        const response = await this.httpClient.get('/ping');
+        return response.status === 200;
+      } else {
+        // Use traditional Redis
+        await this.client.ping();
+        return true;
+      }
     } catch (error) {
       console.error('Redis health check failed:', error);
       return false;

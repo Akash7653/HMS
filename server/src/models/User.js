@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Add indexes after schema definition to avoid duplicate warnings
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ phone: 1 }, { unique: true });
+
 userSchema.pre("save", async function hashPassword(next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
