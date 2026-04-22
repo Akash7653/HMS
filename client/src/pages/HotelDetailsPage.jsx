@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import toast from "react-hot-toast";
 import api from "../api";
 import { useAuth } from "../context/AuthContext";
+import HotelMap from "../components/ui/HotelMap";
 
 function loadRazorpayScript() {
   return new Promise((resolve) => {
@@ -322,7 +323,7 @@ export default function HotelDetailsPage() {
             <h1 className="font-display text-[24px] font-bold leading-tight bg-gradient-to-r from-cyan-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent sm:text-4xl">{hotel.name}</h1>
           </div>
           <span className="rounded-full bg-white/80 px-3 py-1.5 text-[11px] font-semibold text-slate-700 shadow-sm dark:bg-slate-800/80 dark:text-slate-200 sm:text-sm">
-            {hotel.location?.city}, {hotel.location?.country}
+            {hotel.location?.city}, {hotel.location?.state}
           </span>
         </div>
         <p className="max-w-3xl text-[13px] text-slate-600 dark:text-slate-300 sm:text-sm">{hotel.description}</p>
@@ -349,6 +350,10 @@ export default function HotelDetailsPage() {
         </div>
         <button type="button" className="btn-secondary" onClick={toggleWishlist}>Add/Remove Wishlist</button>
       </section>
+
+      {hotel.location?.coordinates ? (
+        <HotelMap hotels={[hotel]} title={`${hotel.name} location`} />
+      ) : null}
 
       <section className="grid gap-3 lg:grid-cols-2">
         <div className="card space-y-2.5 bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-800">

@@ -223,9 +223,13 @@ export default function BookingCheckoutPage() {
         <h1 className="font-display text-[22px] font-bold leading-tight sm:text-2xl">Complete Your Booking</h1>
         <p className="text-[13px] text-slate-600 dark:text-slate-300 sm:text-sm">Secure your stay at {hotel.name} in a few quick steps.</p>
         <div className="flex flex-wrap gap-2 pt-1 text-xs">
-          <span className="rounded-full bg-blue-100 px-2.5 py-1 font-semibold text-blue-700 dark:bg-blue-900/35 dark:text-blue-300">{hotel.location?.city}, {hotel.location?.country}</span>
+          <span className="rounded-full bg-blue-100 px-2.5 py-1 font-semibold text-blue-700 dark:bg-blue-900/35 dark:text-blue-300">{hotel.location?.city}, {hotel.location?.state || "India"}</span>
           <span className="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">Room: {form.roomType}</span>
           <span className="rounded-full bg-cyan-100 px-2.5 py-1 font-semibold text-cyan-700 dark:bg-cyan-900/35 dark:text-cyan-300">Guests: {form.guests}</span>
+        </div>
+        <div className="rounded-2xl border border-blue-200/70 bg-gradient-to-r from-blue-50 via-white to-cyan-50 px-4 py-3 text-[12px] text-slate-700 shadow-sm dark:border-blue-900/40 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800 dark:text-slate-200 sm:text-sm">
+          <p className="font-semibold text-blue-700 dark:text-blue-300">Secure payment by Razorpay</p>
+          <p className="mt-1">UPI, cards, wallets, and netbanking are supported. Payment failures and cancellations are tracked in your history automatically.</p>
         </div>
       </div>
 

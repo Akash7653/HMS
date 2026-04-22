@@ -23,9 +23,14 @@ const hotelSchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     description: { type: String, required: true, trim: true },
     location: {
+      state: { type: String, trim: true, default: "Unknown" },
       city: { type: String, required: true, trim: true },
       address: { type: String, required: true, trim: true },
       country: { type: String, required: true, trim: true },
+      coordinates: {
+        lat: { type: Number, default: 20.5937 },
+        lng: { type: Number, default: 78.9629 },
+      },
     },
     amenities: [{ type: String }],
     images: [{ type: String }],

@@ -15,6 +15,7 @@ exports.getHotels = async (req, res, next) => {
       sortBy = "createdAt",
       order = "desc",
       q,
+      state,
       checkIn,
       checkOut,
       roomType,
@@ -23,6 +24,7 @@ exports.getHotels = async (req, res, next) => {
     const query = { isActive: true };
 
     if (city) query["location.city"] = new RegExp(city, "i");
+    if (state) query["location.state"] = new RegExp(state, "i");
     if (rating) query.ratingAverage = { $gte: Number(rating) };
     if (q) query.name = new RegExp(q, "i");
 

@@ -3,10 +3,13 @@ import { motion } from "framer-motion";
 import { useSearchParams } from "react-router-dom";
 import api from "../api";
 import HotelCard from "../components/ui/HotelCard";
+import HotelMap from "../components/ui/HotelMap";
 import SkeletonCard from "../components/ui/SkeletonCard";
+import { INDIA_STATES } from "../data/indiaStates";
 
 const defaultFilters = {
   city: "",
+  state: "",
   minPrice: "",
   maxPrice: "",
   rating: "",
@@ -26,34 +29,53 @@ export default function HotelsPage() {
   });
   const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [hotels, setHotels] = useState([]);
+  const [mapHotels, setMapHotels] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mapLoading, setMapLoading] = useState(false);
   const [showMap, setShowMap] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
 
-  const fetchHotels = useCallback(async () => {
-    setLoading(true);
+  const fetchHotels = useCallback(async (mode = "page") => {
+    if (mode === "map") {
+      setMapLoading(true);
+    } else {
+      setLoading(true);
+    }
     try {
       const query = {
         city: filters.city,
+        state: filters.state,
         minPrice: filters.minPrice,
         maxPrice: filters.maxPrice,
         rating: filters.rating,
-        page: filters.page,
-        limit: filters.limit,
+        page: mode === "map" ? 1 : filters.page,
+        limit: mode === "map" ? 1008 : filters.limit,
         sortBy: "createdAt",
         order: "desc",
       };
 
       const res = await api.get("/hotels", { params: query });
-      setHotels(res.data.data || []);
-      setPagination(res.data.pagination || { page: 1, pages: 1, total: 0 });
+      if (mode === "map") {
+        setMapHotels(res.data.data || []);
+      } else {
+        setHotels(res.data.data || []);
+        setPagination(res.data.pagination || { page: 1, pages: 1, total: 0 });
+      }
     } catch {
-      setHotels([]);
-      setPagination({ page: 1, pages: 1, total: 0 });
+      if (mode === "map") {
+        setMapHotels([]);
+      } else {
+        setHotels([]);
+        setPagination({ page: 1, pages: 1, total: 0 });
+      }
     } finally {
-      setLoading(false);
+      if (mode === "map") {
+        setMapLoading(false);
+      } else {
+        setLoading(false);
+      }
     }
-  }, [filters.city, filters.minPrice, filters.maxPrice, filters.rating, filters.page, filters.limit]);
+  }, [filters.city, filters.state, filters.minPrice, filters.maxPrice, filters.rating, filters.page, filters.limit]);
 
   useEffect(() => {
     const city = params.get("city") || "";
@@ -64,8 +86,14 @@ export default function HotelsPage() {
     fetchHotels();
   }, [fetchHotels]);
 
-  const displayedHotels = useMemo(() => {
-    let result = [...hotels];
+  useEffect(() => {
+    if (!showMap) return;
+    setMapLoading(true);
+    fetchHotels("map");
+  }, [showMap, fetchHotels]);
+
+  const applyLocalFilters = (list) => {
+    let result = [...list];
 
     if (selectedAmenities.length) {
       result = result.filter((hotel) => selectedAmenities.every((a) => hotel.amenities?.includes(a)));
@@ -80,7 +108,10 @@ export default function HotelsPage() {
     }
 
     return result;
-  }, [hotels, selectedAmenities, filters.sortBy]);
+  };
+
+  const displayedHotels = useMemo(() => applyLocalFilters(hotels), [hotels, selectedAmenities, filters.sortBy]);
+  const displayedMapHotels = useMemo(() => applyLocalFilters(mapHotels), [mapHotels, selectedAmenities, filters.sortBy]);
 
   const onSearch = (e) => {
     e.preventDefault();
@@ -131,6 +162,13 @@ export default function HotelsPage() {
             />
           </label>
 
+          <select className="input" value={filters.state} onChange={(e) => setFilters((p) => ({ ...p, state: e.target.value }))}>
+            <option value="">All states</option>
+            {INDIA_STATES.map((state) => (
+              <option key={state} value={state}>{state}</option>
+            ))}
+          </select>
+
           <div className="grid grid-cols-2 gap-2">
             <input className="input" placeholder="Min price" type="number" value={filters.minPrice} onChange={(e) => setFilters((p) => ({ ...p, minPrice: e.target.value }))} />
             <input className="input" placeholder="Max price" type="number" value={filters.maxPrice} onChange={(e) => setFilters((p) => ({ ...p, maxPrice: e.target.value }))} />
@@ -175,9 +213,13 @@ export default function HotelsPage() {
         </div>
 
         {showMap ? (
-          <section className="card flex h-40 items-center justify-center border-dashed border-slate-300 text-center text-[13px] text-slate-500 dark:border-slate-700 dark:text-slate-300 sm:h-44 sm:text-sm lg:h-52 lg:text-base">
-            Interactive map can be connected here. Tap any card below to open details.
-          </section>
+          mapLoading ? (
+            <section className="card flex h-52 items-center justify-center border-dashed border-slate-300 text-center text-[13px] text-slate-500 dark:border-slate-700 dark:text-slate-300 lg:h-[560px] lg:text-base">
+              Loading map markers...
+            </section>
+          ) : (
+            <HotelMap hotels={displayedMapHotels} title="Filtered India hotels" />
+          )
         ) : null}
 
         <div className="grid gap-3 sm:grid-cols-2 lg:gap-4 xl:grid-cols-3 2xl:grid-cols-4">

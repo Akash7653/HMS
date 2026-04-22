@@ -21,7 +21,7 @@ export default function BookingConfirmationPage() {
       <section className="card space-y-3">
         <h2 className="text-lg font-bold">Hotel Summary</h2>
         <p className="font-semibold">{hotel?.name || "Horizon-Hotels Partner Stay"}</p>
-        <p className="text-sm text-slate-600 dark:text-slate-300">{hotel?.location?.city || "City"}, {hotel?.location?.country || "India"}</p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">{hotel?.location?.city || "City"}, {hotel?.location?.state || "State"}, {hotel?.location?.country || "India"}</p>
         {booking ? (
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="rounded-xl bg-slate-50 p-2 dark:bg-slate-800/60">
