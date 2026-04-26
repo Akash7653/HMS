@@ -255,7 +255,7 @@ export default function App() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 1.1 }}
             transition={{ duration: 0.8, ease: "easeInOut" }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-indigo-600"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800"
           >
             <motion.div
               initial={{ scale: 0.82, opacity: 0.15 }}
