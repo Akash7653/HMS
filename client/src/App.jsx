@@ -48,7 +48,8 @@ export default function App() {
   const hideFooter = Boolean(
     location.pathname.startsWith("/login") ||
       location.pathname.startsWith("/register") ||
-      (user && location.pathname.startsWith("/hotels"))
+      (user && location.pathname.startsWith("/hotels")) ||
+      window.innerWidth < 768 // Always hide footer on mobile
   );
 
   useEffect(() => {
@@ -244,6 +245,20 @@ export default function App() {
       {!hideFooter ? <MobileSupportStrip /> : null}
       {!hideFooter ? <div className="hidden md:block"><GlobalFooter /></div> : null}
       {!hideBottomNav ? <MobileBottomNav isLoggedIn={Boolean(user)} /> : null}
+      
+      {/* Hotels button below nav with gap - mobile only */}
+      {!hideBottomNav && (
+        <div className="md:hidden fixed bottom-20 left-1/2 transform -translate-x-1/2 z-30">
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            onClick={() => window.location.href = '/hotels'}
+            className="tap-target rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-3 text-sm font-bold text-white shadow-lg"
+          >
+            Hotels
+          </motion.button>
+        </div>
+      )}
+      
       {!hideAiChat ? <AiChatWidget /> : null}
       <Toaster position="bottom-right" />
 
@@ -252,7 +267,7 @@ export default function App() {
           <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#f96f38]"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500"
           >
             <motion.div
               initial={{ scale: 0.82, opacity: 0.15 }}

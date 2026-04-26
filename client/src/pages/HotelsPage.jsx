@@ -23,10 +23,43 @@ export default function HotelsPage() {
   const savedAlertsKey = "hms_saved_search_alerts";
   const [params] = useSearchParams();
   const [scope, setScope] = useState("India");
+  const [userLocation, setUserLocation] = useState(null);
   const [filters, setFilters] = useState({
     ...defaultFilters,
     city: params.get("city") || "",
   });
+
+  // Get user's current location
+  const getUserLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ latitude, longitude });
+        
+        // Search for hotels near user's location
+        setFilters(prev => ({
+          ...prev,
+          city: "Near Me",
+          latitude,
+          longitude
+        }));
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        alert("Unable to get your location. Please enable location services.");
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // 5 minutes
+      }
+    );
+  }, []);
   const [selectedAmenities, setSelectedAmenities] = useState([]);
   const [hotels, setHotels] = useState([]);
   const [mapHotels, setMapHotels] = useState([]);
@@ -77,6 +110,13 @@ export default function HotelsPage() {
         sortBy: "createdAt",
         order: "desc",
       };
+
+      // Add location parameters if searching near user
+      if (filters.latitude && filters.longitude) {
+        query.latitude = filters.latitude;
+        query.longitude = filters.longitude;
+        query.radius = 50; // Search within 50km
+      }
 
       const res = await api.get("/hotels", { params: query });
       const serverHotels = res.data.data || [];
@@ -325,6 +365,25 @@ export default function HotelsPage() {
                 onChange={(e) => setFilters((p) => ({ ...p, city: e.target.value }))}
               />
             </label>
+
+            {/* Near Me Button */}
+            <button
+              type="button"
+              onClick={getUserLocation}
+              className={`tap-target mt-2 w-full rounded-xl px-4 py-2.5 text-sm font-semibold transition ${
+                filters.city === "Near Me"
+                  ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+                  : "border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 dark:border-blue-700/50 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
+              }`}
+            >
+              <span className="flex items-center justify-center gap-2">
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 10c0 7-9 13-9 13s9 13 9 13-9-13-9-13-9zM12 14a4 4 0 1 1 0 0 1 0 0-1 0 0-1zM12 2v4M12 18v4" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                {userLocation ? "Near Me" : "Use My Location"}
+              </span>
+            </button>
 
             {showSuggestions && (suggestionsLoading || hasSuggestions) ? (
               <div className="absolute z-20 mt-1 w-full rounded-xl border border-slate-200 bg-white/95 p-2 shadow-xl dark:border-slate-700 dark:bg-slate-900/95">
