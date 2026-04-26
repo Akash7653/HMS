@@ -438,7 +438,6 @@ export default function HotelsPage() {
               <option key={state} value={state}>{state}</option>
             ))}
           </select>
-          </select>
 
           <div className="grid grid-cols-2 gap-2">
             <input className="input" placeholder="Min price" type="number" value={filters.minPrice} onChange={(e) => setFilters((p) => ({ ...p, minPrice: e.target.value }))} />
