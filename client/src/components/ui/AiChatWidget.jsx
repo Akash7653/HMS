@@ -54,6 +54,12 @@ export default function AiChatWidget() {
   const canSend = useMemo(() => normalize(input).length > 0 && !loading && !isStreaming, [input, loading, isStreaming]);
 
   useEffect(() => {
+    const handleToggle = () => setOpen((prev) => !prev);
+    window.addEventListener("toggle-ai-chat", handleToggle);
+    return () => window.removeEventListener("toggle-ai-chat", handleToggle);
+  }, []);
+
+  useEffect(() => {
     const hasSeen = localStorage.getItem("hms_ai_chat_seen");
     if (hasSeen) return;
 
@@ -193,7 +199,7 @@ export default function AiChatWidget() {
   };
 
   return (
-    <div className="safe-bottom-above-nav fixed left-3 right-3 z-50 sm:bottom-5 sm:left-5 sm:right-auto">
+    <div className="fixed bottom-[80px] left-3 right-3 z-50 sm:bottom-5 sm:left-5 sm:right-auto">
       <AnimatePresence>
         {open ? (
           <motion.div
@@ -203,9 +209,19 @@ export default function AiChatWidget() {
             transition={{ duration: 0.2 }}
             className="mb-3 w-[calc(100vw-1.5rem)] max-w-sm overflow-hidden rounded-3xl border border-white/40 bg-white/90 shadow-2xl shadow-cyan-500/15 backdrop-blur-xl sm:w-[90vw] dark:border-slate-700/50 dark:bg-slate-900/92"
           >
-            <div className="bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 px-4 py-3 text-white">
-              <p className="font-display text-lg font-bold">Horizon AI Concierge</p>
-              <p className="text-xs text-white/90">Smart help for stays, bookings, and payments</p>
+            <div className="flex items-center justify-between bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 px-4 py-3 text-white">
+              <div>
+                <p className="font-display text-lg font-bold">Horizon AI Concierge</p>
+                <p className="text-xs text-white/90">Smart help for stays, bookings, and payments</p>
+              </div>
+              <button 
+                onClick={() => setOpen(false)}
+                className="rounded-full bg-white/20 p-1.5 text-white hover:bg-white/30 md:hidden"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
             </div>
 
             <div ref={scrollRef} className="max-h-[58vh] space-y-2 overflow-y-auto px-3 py-3 sm:max-h-80">
@@ -287,6 +303,7 @@ export default function AiChatWidget() {
         ) : null}
       </AnimatePresence>
 
+      {/* Show launcher on desktop only since mobile uses center nav button */}
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.97 }}
@@ -294,7 +311,7 @@ export default function AiChatWidget() {
         transition={highlightLauncher && !open ? { duration: 1.4, repeat: Infinity, ease: "easeInOut" } : { duration: 0.2 }}
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="tap-target relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-xl shadow-cyan-500/30"
+        className="tap-target relative hidden items-center justify-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-xl shadow-cyan-500/30 md:inline-flex"
       >
         {highlightLauncher && !open ? (
           <span className="absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-400 px-1 text-[10px] font-extrabold text-slate-900">

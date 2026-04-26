@@ -32,14 +32,15 @@ export default function App() {
   const rafRef = useRef(null);
 
   const hideBottomNav = useMemo(
-    () => location.pathname.startsWith("/admin"),
+    () => 
+      location.pathname.startsWith("/admin") ||
+      location.pathname.startsWith("/checkout") ||
+      location.pathname.startsWith("/confirmation"),
     [location.pathname]
   );
 
   const hideAiChat = useMemo(
     () =>
-      location.pathname.startsWith("/login") ||
-      location.pathname.startsWith("/register") ||
       location.pathname.startsWith("/checkout") ||
       location.pathname.startsWith("/confirmation"),
     [location.pathname]
