@@ -96,16 +96,16 @@ export default function MobileBottomNav({ isLoggedIn }) {
   return (
     <>
       <nav className="safe-bottom-nav fixed inset-x-3 z-40 rounded-3xl border border-white/60 bg-white/90 p-2 shadow-2xl backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-900/90 md:hidden">
-        <div className="grid gap-1" style={{ gridTemplateColumns: "1fr auto 1fr" }}>
+        <div className="flex items-center justify-between gap-2">
           {/* Left side items */}
-          <ul className="grid gap-1" style={{ gridTemplateColumns: `repeat(${visibleLeftItems.length}, minmax(0, 1fr))` }}>
+          <ul className="flex gap-1">
             {visibleLeftItems.map((item) => (
               <li key={item.to}>
                 <NavLink to={item.to} end={item.to === "/"} className="block">
                   {({ isActive }) => (
                     <motion.span
                       whileTap={{ scale: 0.96 }}
-                      className={`tap-target relative flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold transition ${
+                      className={`tap-target relative flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-[11px] font-semibold transition ${
                         isActive
                           ? "bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 text-white"
                           : "text-slate-600 dark:text-slate-300"
@@ -126,14 +126,14 @@ export default function MobileBottomNav({ isLoggedIn }) {
           </div>
 
           {/* Right side items */}
-          <ul className="grid gap-1" style={{ gridTemplateColumns: `repeat(${visibleRightItems.length}, minmax(0, 1fr))` }}>
+          <ul className="flex gap-1">
             {visibleRightItems.map((item) => (
               <li key={item.to}>
                 <NavLink to={item.to} end={item.to === "/"} className="block">
                   {({ isActive }) => (
                     <motion.span
                       whileTap={{ scale: 0.96 }}
-                      className={`tap-target relative flex flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-semibold transition ${
+                      className={`tap-target relative flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-2 text-[11px] font-semibold transition ${
                         isActive
                           ? "bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 text-white"
                           : "text-slate-600 dark:text-slate-300"
@@ -150,16 +150,18 @@ export default function MobileBottomNav({ isLoggedIn }) {
         </div>
       </nav>
 
-      {/* Key Options Button */}
-      <motion.button
-        whileTap={{ scale: 0.96 }}
-        onClick={toggleKeyOptions}
-        className="tap-target fixed bottom-24 right-4 z-30 flex items-center justify-center rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 p-3 text-white shadow-lg md:hidden"
-      >
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 0M8 12h.01M19 19l-7-7 7-7" />
-        </svg>
-      </motion.button>
+      {/* Key Options Button - Only show when logged in */}
+      {isLoggedIn && (
+        <motion.button
+          whileTap={{ scale: 0.96 }}
+          onClick={toggleKeyOptions}
+          className="tap-target fixed bottom-24 right-4 z-30 flex items-center justify-center rounded-full bg-gradient-to-r from-blue-500 via-cyan-500 to-indigo-600 p-3 text-white shadow-lg md:hidden"
+        >
+          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 0M8 12h.01M19 19l-7-7 7-7" />
+          </svg>
+        </motion.button>
+      )}
 
       {/* Key Options Panel */}
       <AnimatePresence>
@@ -170,25 +172,51 @@ export default function MobileBottomNav({ isLoggedIn }) {
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className="fixed bottom-32 right-4 z-30 w-64 rounded-2xl border border-white/60 bg-white/95 p-4 shadow-2xl backdrop-blur-xl dark:border-slate-700/50 dark:bg-slate-900/95 md:hidden"
           >
-            <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-200">Quick Actions</h3>
+            <h3 className="mb-3 text-sm font-semibold text-slate-800 dark:text-slate-200">
+              {isLoggedIn ? "Quick Actions" : "Get Started"}
+            </h3>
             <div className="space-y-2">
-              <button 
-                onClick={() => {
-                  // Trigger global location function
-                  if (window.getUserLocation) {
-                    window.getUserLocation();
-                  }
-                }}
-                className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white transition hover:from-blue-600 hover:to-cyan-600"
-              >
-                Near Me Hotels
-              </button>
-              <button className="w-full rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-sm font-medium text-white transition hover:from-purple-600 hover:to-pink-600">
-                Emergency Support
-              </button>
-              <button className="w-full rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:from-green-600 hover:to-emerald-600">
-                Quick Booking
-              </button>
+              {isLoggedIn ? (
+                <>
+                  <button 
+                    onClick={() => {
+                      // Trigger global location function
+                      if (window.getUserLocation) {
+                        window.getUserLocation();
+                      }
+                    }}
+                    className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white transition hover:from-blue-600 hover:to-cyan-600"
+                  >
+                    Near Me Hotels
+                  </button>
+                  <button className="w-full rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-sm font-medium text-white transition hover:from-purple-600 hover:to-pink-600">
+                    My Bookings
+                  </button>
+                  <button className="w-full rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:from-green-600 hover:to-emerald-600">
+                    Quick Booking
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => {
+                      // Trigger global location function
+                      if (window.getUserLocation) {
+                        window.getUserLocation();
+                      }
+                    }}
+                    className="w-full rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-2 text-sm font-medium text-white transition hover:from-blue-600 hover:to-cyan-600"
+                  >
+                    Find Hotels
+                  </button>
+                  <button className="w-full rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 text-sm font-medium text-white transition hover:from-purple-600 hover:to-pink-600">
+                    Sign Up
+                  </button>
+                  <button className="w-full rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 text-sm font-medium text-white transition hover:from-green-600 hover:to-emerald-600">
+                    Login
+                  </button>
+                </>
+              )}
             </div>
           </motion.div>
         )}

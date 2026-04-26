@@ -245,20 +245,6 @@ export default function App() {
       {!hideFooter ? <MobileSupportStrip /> : null}
       {!hideFooter ? <div className="hidden md:block"><GlobalFooter /></div> : null}
       {!hideBottomNav ? <MobileBottomNav isLoggedIn={Boolean(user)} /> : null}
-      
-      {/* Hotels button below nav with gap - mobile only */}
-      {!hideBottomNav && (
-        <div className="md:hidden fixed bottom-20 left-1/2 transform -translate-x-1/2 z-30">
-          <motion.button
-            whileTap={{ scale: 0.96 }}
-            onClick={() => window.location.href = '/hotels'}
-            className="tap-target rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-3 text-sm font-bold text-white shadow-lg"
-          >
-            Hotels
-          </motion.button>
-        </div>
-      )}
-      
       {!hideAiChat ? <AiChatWidget /> : null}
       <Toaster position="bottom-right" />
 
