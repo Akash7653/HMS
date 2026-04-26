@@ -1,7 +1,9 @@
-﻿const User = require("../models/User");
+const User = require("../models/User");
 const AuthService = require("../services/authService");
 const OAuthService = require("../services/oauthService");
 const { sendEmailSimulation } = require("../services/emailService");
+const crypto = require("crypto");
+const { signToken, signRefreshToken, verifyRefreshToken } = require("../utils/jwt");
 
 function toUserPayload(user) {
   return {
@@ -322,20 +324,4 @@ exports.revokeAllSessions = async (req, res, next) => {
   }
 };
 
-// Enhanced logout
-exports.logout = async (req, res, next) => {
-  try {
-    const { refreshToken } = req.body;
-    const accessToken = req.headers.authorization?.replace('Bearer ', '');
-    
-    await AuthService.logout(accessToken, refreshToken);
-    
-    res.json({
-      success: true,
-      message: "Logged out successfully"
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
