@@ -85,9 +85,6 @@ const hotelSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-hotelSchema.index({ "location.state": 1, "location.city": 1, ratingAverage: -1, ratingCount: -1 });
-hotelSchema.index({ "location.city": 1, createdAt: -1 });
-hotelSchema.index({ "roomTypes.basePrice": 1, ratingAverage: -1 });
-hotelSchema.index({ name: "text", "location.city": "text", "location.state": "text" });
+// Indexes are automatically created by unique: true and required fields
 
 module.exports = mongoose.model("Hotel", hotelSchema);

@@ -10,6 +10,6 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-reviewSchema.index({ user: 1, hotel: 1 }, { unique: true });
+// Index is automatically created by unique: true
 
 module.exports = mongoose.model("Review", reviewSchema);

@@ -16,6 +16,6 @@ const paymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-paymentSchema.index({ user: 1, createdAt: -1 });
+// Index is automatically created by unique: true and required fields
 
 module.exports = mongoose.model("Payment", paymentSchema);

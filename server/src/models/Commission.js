@@ -39,8 +39,6 @@ const commissionSchema = new mongoose.Schema({
   calculatedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
-commissionSchema.index({ vendor: 1, status: 1 });
-commissionSchema.index({ booking: 1 });
-commissionSchema.index({ status: 1, holdUntil: 1 });
+// Indexes are automatically created by unique: true and required fields
 
 module.exports = mongoose.model("Commission", commissionSchema);

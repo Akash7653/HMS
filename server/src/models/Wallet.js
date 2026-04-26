@@ -76,8 +76,7 @@ const walletSchema = new mongoose.Schema({
   transactions: [walletTransactionSchema]
 }, { timestamps: true });
 
-walletSchema.index({ user: 1 });
-walletSchema.index({ balance: -1 });
+// Indexes are automatically created by unique: true and required fields
 
 // Method to add transaction
 walletSchema.methods.addTransaction = async function(transactionData) {

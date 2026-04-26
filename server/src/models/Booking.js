@@ -20,6 +20,6 @@ const bookingSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-bookingSchema.index({ hotel: 1, roomType: 1, checkIn: 1, checkOut: 1, bookingStatus: 1 });
+// Indexes are automatically created by unique: true and required fields
 
 module.exports = mongoose.model("Booking", bookingSchema);

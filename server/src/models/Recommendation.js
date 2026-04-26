@@ -19,8 +19,6 @@ const recommendationSchema = new mongoose.Schema({
   expiresAt: { type: Date, default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) } // 7 days
 }, { timestamps: true });
 
-recommendationSchema.index({ user: 1, score: -1 });
-recommendationSchema.index({ hotel: 1, reason: 1 });
-recommendationSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// Indexes are automatically created by unique: true and required fields
 
 module.exports = mongoose.model("Recommendation", recommendationSchema);

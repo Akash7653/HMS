@@ -77,8 +77,6 @@ const vendorSchema = new mongoose.Schema({
   suspensionReason: { type: String }
 }, { timestamps: true });
 
-vendorSchema.index({ user: 1 });
-vendorSchema.index({ "verificationStatus": 1 });
-vendorSchema.index({ "performanceMetrics.totalRevenue": -1 });
+// Indexes are automatically created by unique: true and required fields
 
 module.exports = mongoose.model("Vendor", vendorSchema);

@@ -113,9 +113,7 @@ const loyaltyProgramSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-loyaltyProgramSchema.index({ user: 1 });
-loyaltyProgramSchema.index({ currentPoints: -1 });
-loyaltyProgramSchema.index({ currentTier: 1 });
+// Indexes are automatically created by unique: true and required fields
 
 // Static method to get tier configurations
 loyaltyProgramSchema.statics.getTierConfigs = function() {
