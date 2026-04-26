@@ -265,9 +265,11 @@ export default function App() {
       <AnimatePresence>
         {showSplash ? (
           <motion.div
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500"
+            initial={{ opacity: 1, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-gradient-to-br from-purple-600 via-pink-500 to-indigo-600"
           >
             <motion.div
               initial={{ scale: 0.82, opacity: 0.15 }}

@@ -79,9 +79,6 @@ const analyticsSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-analyticsSchema.index({ date: -1 });
-analyticsSchema.index({ "pageViews.userId": 1 });
-analyticsSchema.index({ "events.userId": 1 });
-analyticsSchema.index({ "conversions.userId": 1 });
+// Indexes are automatically created by unique: true and required fields
 
 module.exports = mongoose.model("Analytics", analyticsSchema);

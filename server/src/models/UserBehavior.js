@@ -44,10 +44,6 @@ const userBehaviorSchema = new mongoose.Schema({
   userAgent: String
 }, { timestamps: true });
 
-// Add indexes after schema definition to avoid duplicate warnings
-userBehaviorSchema.index({ user: 1, timestamp: -1 });
-userBehaviorSchema.index({ type: 1, timestamp: -1 });
-userBehaviorSchema.index({ hotel: 1, type: 1 });
-userBehaviorSchema.index({ "searchData.city": 1, timestamp: -1 });
+// Indexes are automatically created by unique: true and required fields
 
 module.exports = mongoose.model("UserBehavior", userBehaviorSchema);

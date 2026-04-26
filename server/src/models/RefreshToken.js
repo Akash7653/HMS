@@ -34,7 +34,6 @@ const refreshTokenSchema = new mongoose.Schema({
   revokeReason: { type: String }
 }, { timestamps: true });
 
-refreshTokenSchema.index({ user: 1 });
-refreshTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// Indexes are automatically created by unique: true and required fields
 
 module.exports = mongoose.model("RefreshToken", refreshTokenSchema);

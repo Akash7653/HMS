@@ -3,14 +3,14 @@ dotenv.config();
 
 const app = require("./app");
 const connectDB = require("./config/db");
-const { connectRedis } = require("./services/redisService");
+const redisService = require("./services/redisService");
 
 const PORT = process.env.PORT || 5000;
 
 (async () => {
   try {
     await connectDB();
-    await connectRedis();
+    await redisService.connect();
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
