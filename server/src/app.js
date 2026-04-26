@@ -25,26 +25,11 @@ const { authLimiter, searchLimiter, paymentsLimiter } = require("./middleware/ra
 const app = express();
 
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://horizon-hotels.vercel.app"
-];
-
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow all origins for development
-    if (process.env.NODE_ENV === 'development') {
-      return callback(null, true);
-    }
-    
-    if (!origin) return callback(null, true); // allow Postman / mobile apps
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      // For now, allow all origins to fix login issues
-      console.warn('CORS: Allowing origin:', origin);
-      callback(null, true);
-    }
+    // Allow all origins to fix login issues
+    console.warn('CORS: Allowing origin:', origin);
+    return callback(null, true);
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -54,16 +39,17 @@ app.use(cors({
 
 // Additional CORS middleware for better compatibility
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   res.header('Access-Control-Allow-Credentials', 'true');
   
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);
-  } else {
-    next();
+    return;
   }
+  
+  next();
 });
 
 app.options("*", cors());
